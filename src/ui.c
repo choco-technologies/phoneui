@@ -282,7 +282,8 @@ static void type_key(ui_t ui, int code, char* message, size_t size)
         type_erase(ui);
     else if (code == 0x29)
     {
-        ui->typed[0] = '\0';
+        ui->typed[0] = '\0';                                    /* Escape: the field is cleared and deselected */
+        ui->typing = false;
         show_typed(ui);
     }
     else if (code == 0x28 && ui->typed[0] != '\0')
@@ -301,7 +302,8 @@ void ui_handle(ui_t ui, const libdmview_event_t* ev)
 
     if (strcmp(name, "page") == 0)
     {
-        ui->typing = false;                                         /* the cursor goes away with the page */
+        ui->typing = false;                                         /* the field is deselected with the page, and empty */
+        ui->typed[0] = '\0';
         show_typed(ui);
         ui_show_all(ui);                                           /* a page opens: what it shows is up to date */
     }
@@ -341,15 +343,20 @@ void ui_handle(ui_t ui, const libdmview_event_t* ev)
     }
     else if (strcmp(name, "notification") == 0 || strcmp(name, "apps.filter") == 0 || strcmp(name, "mods") == 0)
         ;                                                       /* nothing to do yet */
+    else if (strcmp(name, "search") == 0)
+    {
+        ui->typing = true;                                          /* a tap on the search bar selects it: the keys go there */
+        show_typed(ui);
+    }
     else if (strcmp(name, "char") == 0)
     {
-        ui->typing = true;
-        type_char(ui, (uint32_t)ev->value);
+        if (ui->typing)                                             /* with no field selected the keys go nowhere */
+            type_char(ui, (uint32_t)ev->value);
     }
     else if (strcmp(name, "key") == 0)
     {
-        ui->typing = true;
-        type_key(ui, value, message, sizeof(message));
+        if (ui->typing)
+            type_key(ui, value, message, sizeof(message));
     }
     else
         phoneui_backend_request(ui->backend, name, message, sizeof(message));

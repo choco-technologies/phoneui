@@ -35,7 +35,7 @@
     <i class="ph-bold ph-chat-circle-text ico hidden" id="n2-k1"></i><i class="ph-bold ph-graph ico hidden" id="n2-k2"></i><i class="ph-bold ph-phone ico" id="n2-k3"></i>
     <div class="who" id="n2-title">Missed call</div><div class="txt" id="n2-text">Tomek</div><div class="tm" id="n2-time">08:30</div><div class="pill hidden" id="n2-badge" style="right:10px;top:18px">0</div>
   </div>
-  <div id="search"><i class="ph-bold ph-magnifying-glass "></i><span class="hint">Type to search or run</span></div>
+  <div id="search"><i class="ph-bold ph-magnifying-glass "></i><span class="hint" id="search-hint">Type to search or run</span><span class="typed hidden" id="search-text"> !"#$%&amp;'()*+,-./0123456789:;&lt;=&gt;?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]_abcdefghijklmnopqrstuvwxyz{|}~·…✓ĄĆĘŁŃÓŚŹŻąćęłńóśźż</span></div>
   <div class="tile small dock" id="dock0" style="left:14px;top:234px"><i class="ph-bold ph-phone "></i></div>
   <div class="tile small dock" id="dock1" style="left:58px;top:234px"><i class="ph-bold ph-chat-circle-text "></i></div>
   <div class="tile small dock" id="dock2" style="left:102px;top:234px"><i class="ph-bold ph-graph "></i></div>
@@ -253,6 +253,9 @@ dmod.prop('lora', 1);
 dmod.prop('toast', '');
 /* home */
 dmod.prop('home.line', '');
+/* typing: what the keyboard wrote, in the search bar of the home page */
+dmod.prop('search.text', '');
+dmod.prop('search.on', 0);
 /* quick settings */
 dmod.prop('q.level', 6);
 dmod.prop('q.battery', '');
@@ -277,6 +280,9 @@ const homeDate = document.getElementById('home-date');
 dmod.onchange('date', () => homeDate.innerText = dmod.get('date'));
 const homeLine = document.getElementById('home-line');
 dmod.onchange('home.line', () => homeLine.innerText = dmod.get('home.line'));
+const searchHint = document.getElementById('search-hint'), searchText = document.getElementById('search-text');
+dmod.onchange('search.text', () => searchText.innerText = dmod.get('search.text'));
+dmod.onchange('search.on', () => { shown(searchText, dmod.get('search.on')); shown(searchHint, !dmod.get('search.on')); });
 
 /* signal: one of five icons */
 const sg0 = document.querySelector('.sg0'), sg1 = document.querySelector('.sg1'), sg2 = document.querySelector('.sg2'),

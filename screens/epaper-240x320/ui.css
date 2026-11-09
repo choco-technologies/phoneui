@@ -74,6 +74,7 @@ body { font-size: 12px; line-height: 1.2; }
 #search { position: absolute; left: 10px; top: 205px; width: 220px; height: 22px; border: 2px solid #000; border-radius: 11px; font-size: 12px; }
 #search .ph { position: absolute; left: 8px; top: 3px; font-size: 14px; }
 #search .hint { position: absolute; left: 30px; top: 2px; }
+#search .typed { position: absolute; left: 30px; top: 2px; width: 182px; white-space: nowrap; overflow: hidden; }
 
 /* apps */
 .app { position: absolute; width: 60px; height: 60px; }

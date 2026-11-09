@@ -36,6 +36,7 @@ struct ui
     int                 thread_row;
     unsigned            toasts;
     char                typed[TYPED_MAX + 1];   /* What the keyboard wrote (UTF-8) */
+    bool                typing;                 /* The search bar is where the keys go: it shows a cursor */
 };
 
 static cache_entry_t* cache_find(cache_t* cache, const char* name)
@@ -217,9 +218,12 @@ static void toast(ui_t ui, const char* message)
 /* The characters the keyboard writes: appended to the search bar of the home page (UTF-8) */
 static void show_typed(ui_t ui)
 {
-    set_text(&ui->cache, "search.text", ui->typed);
-    set_int(&ui->cache, "search.on", ui->typed[0] != '\0');
+    char text[TYPED_MAX + 2];
+    Dmod_SnPrintf(text, sizeof(text), "%s|", ui->typed);          /* the cursor says the keys go here */
+    set_text(&ui->cache, "search.text", text);
+    set_int(&ui->cache, "search.on", ui->typing);
 }
+
 
 static unsigned encode_utf8(uint32_t cp, char* out)
 {
@@ -296,7 +300,11 @@ void ui_handle(ui_t ui, const libdmview_event_t* ev)
     int value = (int)ev->value;
 
     if (strcmp(name, "page") == 0)
+    {
+        ui->typing = false;                                         /* the cursor goes away with the page */
+        show_typed(ui);
         ui_show_all(ui);                                           /* a page opens: what it shows is up to date */
+    }
     else if (strcmp(name, "launch") == 0)
         phoneui_backend_launch(ui->backend, value, message, sizeof(message));
     else if (strcmp(name, "inbox.tab") == 0)
@@ -334,9 +342,15 @@ void ui_handle(ui_t ui, const libdmview_event_t* ev)
     else if (strcmp(name, "notification") == 0 || strcmp(name, "apps.filter") == 0 || strcmp(name, "mods") == 0)
         ;                                                       /* nothing to do yet */
     else if (strcmp(name, "char") == 0)
+    {
+        ui->typing = true;
         type_char(ui, (uint32_t)ev->value);
+    }
     else if (strcmp(name, "key") == 0)
+    {
+        ui->typing = true;
         type_key(ui, value, message, sizeof(message));
+    }
     else
         phoneui_backend_request(ui->backend, name, message, sizeof(message));
     if (message[0] != '\0')

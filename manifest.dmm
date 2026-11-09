@@ -1,0 +1,6 @@
+# Include dynamically generated versions list from latest release
+$include https://github.com/choco-technologies/phoneui/releases/download/vlatest/versions.dmm
+
+# Module entries with version placeholder - expanded by $version-available
+phoneui https://github.com/choco-technologies/phoneui/releases/download/v<version>/phoneui-v<version>-<arch_name>.zip
+phoneui_view https://github.com/choco-technologies/phoneui/releases/download/v<version>/phoneui_view-v<version>-<arch_name>.zip

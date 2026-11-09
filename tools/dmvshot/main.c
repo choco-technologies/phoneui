@@ -14,6 +14,7 @@
  *
  * steps:   shot:<name>      write <name>.ppm (what libdmview drew) and <name>-mono.ppm (what the e-paper shows of it)
  *          click:<x>,<y>    a touch and its lifting
+ *          press:<x>,<y>    a touch that stays (a pressed button); release: lifts it
  *          wait:<ms>        let the time pass (timers, the toast)
  *          expect:<name>[:<value>]  the last event of the view was that one (else the exit code says so)
  *          threshold:<n>    from now on the e-paper's picture is white from the luminance n (default 128)
@@ -34,6 +35,7 @@ typedef struct
     const char*         out;
     char                last[LIBDMVIEW_EVENT_NAME_MAX];    /* the last event of the view */
     int32_t             last_value;
+    uint16_t            held_x, held_y; /* where press: touched */
     uint32_t            threshold;      /* a pixel is white when its luminance is at least this (the e-paper's) */
 } shot_t;
 
@@ -207,6 +209,23 @@ int main(int argc, char* argv[])
         }
         else if (strncmp(step, "threshold:", 10) == 0)
             s.threshold = (uint32_t)number(step + 10, NULL);
+        else if (strncmp(step, "press:", 6) == 0)
+        {
+            const char* end;
+            long x = number(step + 6, &end);
+            long y = (*end == ',') ? number(end + 1, NULL) : 0;
+            touch(&s, (uint16_t)x, (uint16_t)y, DMDRVI_INPUT_CONTACT_DOWN);
+            settle(&s, 3 * STEP_MS);
+            s.held_x = (uint16_t)x;
+            s.held_y = (uint16_t)y;
+        }
+        else if (strcmp(step, "release") == 0)
+        {
+            touch(&s, s.held_x, s.held_y, DMDRVI_INPUT_CONTACT_UP);
+            settle(&s, 3 * STEP_MS);
+            touch(&s, 0, 0, DMDRVI_INPUT_CONTACT_UP + 1);
+            settle(&s, 3 * STEP_MS);
+        }
         else if (strncmp(step, "wait:", 5) == 0)
             settle(&s, (uint32_t)number(step + 5, NULL));
         else

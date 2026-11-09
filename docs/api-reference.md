@@ -19,7 +19,7 @@ The properties and the events: [contract.md](contract.md). The functions behind:
 ## dmvshot (host)
 
 ```text
-dmvshot <view.dmv> <out directory> [shot:<name> | click:<x>,<y> | wait:<ms> | expect:<event>[:<value>] | threshold:<n>]...
+dmvshot <view.dmv> <out directory> [shot:<name> | click:<x>,<y> | press:<x>,<y> | release | wait:<ms> | expect:<event>[:<value>] | threshold:<n>]...
 ```
 
 Draws the view with the real `src/ui.c` and the stub backend into an off-screen RGB565 buffer; `shot:` writes `<name>.ppm` (what libdmview

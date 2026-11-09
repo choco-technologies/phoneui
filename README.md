@@ -56,7 +56,7 @@ dmod_loader build/dmf/dmvshot.dmf --args build/views/epaper-240x320/phoneui.dmv 
     shot:home click:200,307 shot:apps click:120,307 click:76,271 shot:inbox
 ```
 
-Steps: `shot:<name>`, `click:<x>,<y>`, `wait:<ms>`, `threshold:<n>`. The events the view emits are printed.
+Steps: `shot:<name>`, `click:<x>,<y>`, `press:<x>,<y>` (a touch that stays: a pressed button) and `release`, `wait:<ms>`, `expect:<event>`, `threshold:<n>`. The events the view emits are printed.
 
 ## Building
 

@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>phoneui - T-Deck Pro (e-paper 240 x 320)</title>
+<link rel="stylesheet" href="../../assets/fonts/inter.css">
+<link rel="stylesheet" href="../../assets/fonts/phosphor-bold.css">
+<link rel="stylesheet" href="ui.css">
+</head>
+<body>
+<div id="phoneui-screen">
+<div id="status">
+  <span class="clock" id="st-clock">09:41</span>
+  <i class="ph-bold ph-cell-signal-none ico sg sg0 hidden"></i><i class="ph-bold ph-cell-signal-low ico sg sg1 hidden"></i><i class="ph-bold ph-cell-signal-medium ico sg sg2 hidden"></i><i class="ph-bold ph-cell-signal-high ico sg sg3 hidden"></i><i class="ph-bold ph-cell-signal-full ico sg sg4"></i>
+  <i class="ph-bold ph-wifi-high ico" id="st-wifi"></i><i class="ph-bold ph-broadcast ico" id="st-lora"></i><i class="ph-bold ph-map-pin ico" id="st-gps"></i><i class="ph-bold ph-bluetooth ico hidden" id="st-bt"></i>
+  <span class="pct" id="st-pct">82</span>
+  <i class="ph-bold ph-battery-empty ico bt bt0 hidden"></i><i class="ph-bold ph-battery-low ico bt bt1 hidden"></i><i class="ph-bold ph-battery-medium ico bt bt2 hidden"></i><i class="ph-bold ph-battery-high ico bt bt3"></i><i class="ph-bold ph-battery-full ico bt bt4 hidden"></i><i class="ph-bold ph-battery-charging ico bt btc hidden"></i>
+</div>
+<div class="page active" id="home">
+  <div class="abs big" id="home-clock">09:41</div>
+  <div class="abs t12 b" style="left:12px;top:53px;width:200px" id="home-date">Saturday, 7 November</div>
+  <div class="abs t10" style="left:12px;top:69px;width:200px" id="home-line">3 mesh nodes  ·  GPS fix</div>
+  <div class="rule2" style="left:10px;top:86px;width:220px"></div>
+  <div class="nrow" id="n0" style="top:90px">
+    <i class="ph-bold ph-chat-circle-text ico" id="n0-k1"></i><i class="ph-bold ph-graph ico hidden" id="n0-k2"></i><i class="ph-bold ph-phone ico hidden" id="n0-k3"></i>
+    <div class="who" id="n0-title">Anna</div><div class="txt" id="n0-text">Będę o 18, zostaw klucze…</div><div class="tm" id="n0-time">09:12</div><div class="pill hidden" id="n0-badge" style="right:10px;top:18px">0</div>
+    <div class="rule" style="left:42px;top:36px;width:188px"></div>
+  </div>
+  <div class="nrow" id="n1" style="top:127px">
+    <i class="ph-bold ph-chat-circle-text ico hidden" id="n1-k1"></i><i class="ph-bold ph-graph ico" id="n1-k2"></i><i class="ph-bold ph-phone ico hidden" id="n1-k3"></i>
+    <div class="who" id="n1-title">#general</div><div class="txt" id="n1-text">Marek: kto na szlaku?</div><div class="tm" id="n1-time">08:55</div><div class="pill" id="n1-badge" style="right:10px;top:18px">3</div>
+    <div class="rule" style="left:42px;top:36px;width:188px"></div>
+  </div>
+  <div class="nrow" id="n2" style="top:164px">
+    <i class="ph-bold ph-chat-circle-text ico hidden" id="n2-k1"></i><i class="ph-bold ph-graph ico hidden" id="n2-k2"></i><i class="ph-bold ph-phone ico" id="n2-k3"></i>
+    <div class="who" id="n2-title">Missed call</div><div class="txt" id="n2-text">Tomek</div><div class="tm" id="n2-time">08:30</div><div class="pill hidden" id="n2-badge" style="right:10px;top:18px">0</div>
+  </div>
+  <div id="search"><i class="ph-bold ph-magnifying-glass "></i><span class="hint">Type to search or run</span></div>
+  <div class="tile small dock" id="dock0" style="left:14px;top:234px"><i class="ph-bold ph-phone "></i></div>
+  <div class="tile small dock" id="dock1" style="left:58px;top:234px"><i class="ph-bold ph-chat-circle-text "></i></div>
+  <div class="tile small dock" id="dock2" style="left:102px;top:234px"><i class="ph-bold ph-graph "></i></div>
+  <div class="tile small dock" id="dock3" style="left:146px;top:234px"><i class="ph-bold ph-map-pin "></i></div>
+  <div class="tile small dock" id="dock4" style="left:190px;top:234px"><i class="ph-bold ph-squares-four "></i></div>
+</div>
+<div class="page" id="apps">
+  <div class="abs" id="apps-search" style="left:10px;top:5px;width:220px;height:22px;border:2px solid #000;border-radius:11px"><i class="ph-bold ph-magnifying-glass abs" style="left:8px;top:3px;font-size:14px"></i><span class="abs t12" style="left:30px;top:2px">Search 128 apps</span></div>
+  <div class="chip " id="ac0" style="left:10px;top:35px;width:28px"><div class="lyr fill on" id="ac0-f"></div><div class="ct lyr" id="ac0-d">All</div><div class="ct white lyr on" id="ac0-w">All</div></div>
+  <div class="chip " id="ac1" style="left:42px;top:35px;width:46px"><div class="lyr fill" id="ac1-f"></div><div class="ct lyr on" id="ac1-d">Comms</div><div class="ct white lyr" id="ac1-w">Comms</div></div>
+  <div class="chip " id="ac2" style="left:92px;top:35px;width:38px"><div class="lyr fill" id="ac2-f"></div><div class="ct lyr on" id="ac2-d">Tools</div><div class="ct white lyr" id="ac2-w">Tools</div></div>
+  <div class="chip " id="ac3" style="left:134px;top:35px;width:40px"><div class="lyr fill" id="ac3-f"></div><div class="ct lyr on" id="ac3-d">Media</div><div class="ct white lyr" id="ac3-w">Media</div></div>
+  <div class="chip " id="ac4" style="left:178px;top:35px;width:36px"><div class="lyr fill" id="ac4-f"></div><div class="ct lyr on" id="ac4-d">More</div><div class="ct white lyr" id="ac4-w">More</div></div>
+  <div class="appspage" id="ap0">
+    <div class="app" id="app0" style="left:0px;top:74px"><div class="tile"><i class="ph-bold ph-phone "></i></div><div class="lbl">Phone</div></div>
+    <div class="app" id="app1" style="left:60px;top:74px"><div class="tile"><i class="ph-bold ph-chat-circle-text "></i></div><div class="lbl">Chat</div></div>
+    <div class="app" id="app2" style="left:120px;top:74px"><div class="tile"><i class="ph-bold ph-graph "></i></div><div class="lbl">Mesh</div></div>
+    <div class="app" id="app3" style="left:180px;top:74px"><div class="tile"><i class="ph-bold ph-map-pin "></i></div><div class="lbl">Maps</div></div>
+    <div class="app" id="app4" style="left:0px;top:138px"><div class="tile"><i class="ph-bold ph-note-pencil "></i></div><div class="lbl">Notes</div></div>
+    <div class="app" id="app5" style="left:60px;top:138px"><div class="tile"><i class="ph-bold ph-book-open "></i></div><div class="lbl">Reader</div></div>
+    <div class="app" id="app6" style="left:120px;top:138px"><div class="tile"><i class="ph-bold ph-gear-six "></i></div><div class="lbl">Settings</div></div>
+    <div class="app" id="app7" style="left:180px;top:138px"><div class="tile"><i class="ph-bold ph-folder-simple "></i></div><div class="lbl">Files</div></div>
+    <div class="app" id="app8" style="left:0px;top:202px"><div class="tile"><i class="ph-bold ph-terminal-window "></i></div><div class="lbl">Terminal</div></div>
+    <div class="app" id="app9" style="left:60px;top:202px"><div class="tile"><i class="ph-bold ph-music-notes "></i></div><div class="lbl">Music</div></div>
+    <div class="app" id="app10" style="left:120px;top:202px"><div class="tile"><i class="ph-bold ph-clock "></i></div><div class="lbl">Clock</div></div>
+    <div class="app" id="app11" style="left:180px;top:202px"><div class="tile"><i class="ph-bold ph-handbag "></i></div><div class="lbl">Store</div></div>
+  </div>
+  <div class="appspage hidden" id="ap1">
+    <div class="app" id="app12" style="left:0px;top:74px"><div class="tile"><i class="ph-bold ph-envelope-simple "></i></div><div class="lbl">Mail</div></div>
+    <div class="app" id="app13" style="left:60px;top:74px"><div class="tile"><i class="ph-bold ph-calendar-blank "></i></div><div class="lbl">Calendar</div></div>
+    <div class="app" id="app14" style="left:120px;top:74px"><div class="tile"><i class="ph-bold ph-calculator "></i></div><div class="lbl">Calc</div></div>
+    <div class="app" id="app15" style="left:180px;top:74px"><div class="tile"><i class="ph-bold ph-microphone "></i></div><div class="lbl">Recorder</div></div>
+    <div class="app" id="app16" style="left:0px;top:138px"><div class="tile"><i class="ph-bold ph-cloud-sun "></i></div><div class="lbl">Weather</div></div>
+    <div class="app" id="app17" style="left:60px;top:138px"><div class="tile"><i class="ph-bold ph-radio "></i></div><div class="lbl">Radio</div></div>
+    <div class="app" id="app18" style="left:120px;top:138px"><div class="tile"><i class="ph-bold ph-flashlight "></i></div><div class="lbl">Torch</div></div>
+    <div class="app" id="app19" style="left:180px;top:138px"><div class="tile"><i class="ph-bold ph-alarm "></i></div><div class="lbl">Alarm</div></div>
+    <div class="app" id="app20" style="left:0px;top:202px"><div class="tile"><i class="ph-bold ph-users "></i></div><div class="lbl">Contacts</div></div>
+    <div class="app" id="app21" style="left:60px;top:202px"><div class="tile"><i class="ph-bold ph-image "></i></div><div class="lbl">Gallery</div></div>
+    <div class="app" id="app22" style="left:120px;top:202px"><div class="tile"><i class="ph-bold ph-game-controller "></i></div><div class="lbl">Games</div></div>
+    <div class="app" id="app23" style="left:180px;top:202px"><div class="tile"><i class="ph-bold ph-question "></i></div><div class="lbl">Help</div></div>
+  </div>
+  <div class="dot" id="dot0" style="left:106px;top:262px"><div class="lyr fill on" id="dot0-f"></div></div>
+  <div class="dot" id="dot1" style="left:120px;top:262px"><div class="lyr fill" id="dot1-f"></div></div>
+</div>
+<div class="page" id="inbox">
+  <div class="title">Messages</div>
+  <div class="abs" id="inbox-search" style="left:180px;top:5px;font-size:18px"><i class="ph-bold ph-magnifying-glass "></i></div>
+  <div class="abs inv" id="inbox-compose" style="left:206px;top:3px;width:24px;height:24px;border:2px solid #000;border-radius:6px;font-size:16px;text-align:center;line-height:20px"><i class="ph-bold ph-plus "></i></div>
+  <div class="tab" id="it0" style="left:10px;top:31px;width:24px"><div class="tl lyr" id="it0-n">All</div><div class="tl bold lyr on" id="it0-b">All</div><div class="ul lyr on" id="it0-u"></div></div>
+  <div class="tab" id="it1" style="left:48px;top:31px;width:30px"><div class="tl lyr on" id="it1-n">SMS</div><div class="tl bold lyr" id="it1-b">SMS</div><div class="ul lyr" id="it1-u"></div></div>
+  <div class="tab" id="it2" style="left:92px;top:31px;width:34px"><div class="tl lyr on" id="it2-n">Mesh</div><div class="tl bold lyr" id="it2-b">Mesh</div><div class="ul lyr" id="it2-u"></div></div>
+  <div class="tab" id="it3" style="left:140px;top:31px;width:42px"><div class="tl lyr on" id="it3-n">Chats</div><div class="tl bold lyr" id="it3-b">Chats</div><div class="ul lyr" id="it3-u"></div></div>
+  <div class="rule" style="left:0;top:52px;width:240px"></div>
+  <div class="mrow" id="m0" style="top:55px">
+    <div class="av"><div class="lyr fill" id="m0-avf"></div><div class="lyr ini on" id="m0-ini">A</div><div class="lyr ini white" id="m0-iniw">A</div></div>
+    <div class="who lyr on" id="m0-title">Anna K.</div><div class="who bold lyr" id="m0-titleb">Anna K.</div>
+    <div class="tag" id="m0-tag"><span id="m0-tagt">SMS</span></div>
+    <div class="tm" id="m0-time">09:12</div><div class="txt" id="m0-text">Będę o 18, zostaw klucze u sąsiada</div><div class="pill hidden" id="m0-badge" style="right:50px;top:21px">0</div>
+    <div class="rule" style="left:44px;top:39px;width:196px"></div>
+  </div>
+  <div class="mrow" id="m1" style="top:99px">
+    <div class="av"><div class="lyr fill on" id="m1-avf"></div><div class="lyr ini" id="m1-ini">#</div><div class="lyr ini white on" id="m1-iniw">#</div></div>
+    <div class="who lyr" id="m1-title">#general</div><div class="who bold lyr on" id="m1-titleb">#general</div>
+    <div class="tag" id="m1-tag"><span id="m1-tagt">MESH</span></div>
+    <div class="tm" id="m1-time">08:55</div><div class="txt" id="m1-text">Marek: kto na szlaku koło schroniska?</div><div class="pill" id="m1-badge" style="right:50px;top:21px">3</div>
+    <div class="rule" style="left:44px;top:39px;width:196px"></div>
+  </div>
+  <div class="mrow" id="m2" style="top:143px">
+    <div class="av"><div class="lyr fill" id="m2-avf"></div><div class="lyr ini on" id="m2-ini">T</div><div class="lyr ini white" id="m2-iniw">T</div></div>
+    <div class="who lyr on" id="m2-title">Tomek</div><div class="who bold lyr" id="m2-titleb">Tomek</div>
+    <div class="tag" id="m2-tag"><span id="m2-tagt">CALL</span></div>
+    <div class="tm" id="m2-time">08:30</div><div class="txt" id="m2-text">Missed call</div><div class="pill hidden" id="m2-badge" style="right:50px;top:21px">0</div>
+    <div class="rule" style="left:44px;top:39px;width:196px"></div>
+  </div>
+  <div class="mrow" id="m3" style="top:187px">
+    <div class="av"><div class="lyr fill on" id="m3-avf"></div><div class="lyr ini" id="m3-ini">M</div><div class="lyr ini white on" id="m3-iniw">M</div></div>
+    <div class="who lyr" id="m3-title">Mama</div><div class="who bold lyr on" id="m3-titleb">Mama</div>
+    <div class="tag" id="m3-tag"><span id="m3-tagt">SMS</span></div>
+    <div class="tm" id="m3-time">yesterday</div><div class="txt" id="m3-text">Zadzwoń jak będziesz mógł</div><div class="pill" id="m3-badge" style="right:50px;top:21px">1</div>
+    <div class="rule" style="left:44px;top:39px;width:196px"></div>
+  </div>
+  <div class="mrow" id="m4" style="top:231px">
+    <div class="av"><div class="lyr fill" id="m4-avf"></div><div class="lyr ini on" id="m4-ini">P</div><div class="lyr ini white" id="m4-iniw">P</div></div>
+    <div class="who lyr on" id="m4-title">Piotr</div><div class="who bold lyr" id="m4-titleb">Piotr</div>
+    <div class="tag" id="m4-tag"><span id="m4-tagt">CHAT</span></div>
+    <div class="tm" id="m4-time">yesterday</div><div class="txt" id="m4-text">trasa.gpx (24 kB)</div><div class="pill hidden" id="m4-badge" style="right:50px;top:21px">0</div>
+    <div class="rule" style="left:44px;top:39px;width:196px"></div>
+  </div>
+</div>
+<div class="page" id="chat">
+  <div class="abs" id="chat-back" style="left:6px;top:5px;font-size:18px"><i class="ph-bold ph-caret-left "></i></div>
+  <div class="abs" style="left:26px;top:4px;width:24px;height:24px;border:2px solid #000;border-radius:12px;font-size:13px;font-weight:700;text-align:center;line-height:20px" id="chat-ini">A</div>
+  <div class="abs t13 b nowrap" style="left:58px;top:3px;width:140px" id="chat-title">Anna K.</div>
+  <div class="abs t10 nowrap" style="left:58px;top:18px;width:140px" id="chat-sub">SMS · 4G</div>
+  <div class="abs" id="chat-call" style="left:210px;top:3px;font-size:20px"><i class="ph-bold ph-phone "></i></div>
+  <div class="rule" style="left:0;top:31px;width:240px"></div>
+  <div class="abs t10" style="left:0;top:37px;width:240px;text-align:center" id="chat-stamp">Today 09:05</div>
+  <div class="bub" id="c0t" style="left:8px;top:51px"><div class="bl" id="c0t-l1">Hej, jesteś już w drodze?</div><div class="bl" id="c0t-l2">&nbsp;</div></div>
+  <div class="bub inv hidden" id="c0m" style="left:42px;top:51px"><div class="bl" id="c0m-l1">Hej, jesteś już w drodze?</div><div class="bl" id="c0m-l2">&nbsp;</div></div>
+  <div class="bub hidden" id="c1t" style="left:8px;top:95px"><div class="bl" id="c1t-l1">Tak, będę na miejscu</div><div class="bl" id="c1t-l2">za 20 min</div></div>
+  <div class="bub inv" id="c1m" style="left:42px;top:95px"><div class="bl" id="c1m-l1">Tak, będę na miejscu</div><div class="bl" id="c1m-l2">za 20 min</div></div>
+  <div class="bub" id="c2t" style="left:8px;top:139px"><div class="bl" id="c2t-l1">Super. Zostawić klucze</div><div class="bl" id="c2t-l2">u sąsiada?</div></div>
+  <div class="bub inv hidden" id="c2m" style="left:42px;top:139px"><div class="bl" id="c2m-l1">Super. Zostawić klucze</div><div class="bl" id="c2m-l2">u sąsiada?</div></div>
+  <div class="bub hidden" id="c3t" style="left:8px;top:183px"><div class="bl" id="c3t-l1">Tak, proszę. Dzięki!</div><div class="bl" id="c3t-l2">&nbsp;</div></div>
+  <div class="bub inv" id="c3m" style="left:42px;top:183px"><div class="bl" id="c3m-l1">Tak, proszę. Dzięki!</div><div class="bl" id="c3m-l2">&nbsp;</div></div>
+  <div class="abs t10" style="left:130px;width:100px;text-align:right;top:221px" id="chat-state">✓ 09:12</div>
+  <div class="rule" style="left:0;top:241px;width:240px"></div>
+  <div class="abs" style="left:8px;top:247px;width:190px;height:22px;border:2px solid #000;border-radius:11px"><span class="abs t11" style="left:10px;top:2px">Type a message</span></div>
+  <div class="abs inv" id="chat-send" style="left:202px;top:247px;width:30px;height:22px;border:2px solid #000;border-radius:11px;font-size:14px;text-align:center;line-height:18px"><i class="ph-bold ph-arrow-elbow-down-left "></i></div>
+</div>
+<div class="page" id="quick">
+  <div class="title">Quick settings</div>
+  <div class="qt on" id="qt0" style="left:10px;top:31px"><div class="lyr fill on" id="qt0-f"></div><div class="lyr dk" id="qt0-d"><div class="qi"><i class="ph-bold ph-wifi-high "></i></div><div class="ql">Wi-Fi</div></div><div class="lyr white on" id="qt0-w"><div class="qi"><i class="ph-bold ph-wifi-high "></i></div><div class="ql">Wi-Fi</div></div></div>
+  <div class="qt on" id="qt1" style="left:82px;top:31px"><div class="lyr fill on" id="qt1-f"></div><div class="lyr dk" id="qt1-d"><div class="qi"><i class="ph-bold ph-cell-signal-full "></i></div><div class="ql">4G</div></div><div class="lyr white on" id="qt1-w"><div class="qi"><i class="ph-bold ph-cell-signal-full "></i></div><div class="ql">4G</div></div></div>
+  <div class="qt" id="qt2" style="left:154px;top:31px"><div class="lyr fill" id="qt2-f"></div><div class="lyr dk on" id="qt2-d"><div class="qi"><i class="ph-bold ph-bluetooth "></i></div><div class="ql">Bluetooth</div></div><div class="lyr white" id="qt2-w"><div class="qi"><i class="ph-bold ph-bluetooth "></i></div><div class="ql">Bluetooth</div></div></div>
+  <div class="qt on" id="qt3" style="left:10px;top:97px"><div class="lyr fill on" id="qt3-f"></div><div class="lyr dk" id="qt3-d"><div class="qi"><i class="ph-bold ph-broadcast "></i></div><div class="ql">LoRa mesh</div></div><div class="lyr white on" id="qt3-w"><div class="qi"><i class="ph-bold ph-broadcast "></i></div><div class="ql">LoRa mesh</div></div></div>
+  <div class="qt on" id="qt4" style="left:82px;top:97px"><div class="lyr fill on" id="qt4-f"></div><div class="lyr dk" id="qt4-d"><div class="qi"><i class="ph-bold ph-map-pin "></i></div><div class="ql">GPS</div></div><div class="lyr white on" id="qt4-w"><div class="qi"><i class="ph-bold ph-map-pin "></i></div><div class="ql">GPS</div></div></div>
+  <div class="qt" id="qt5" style="left:154px;top:97px"><div class="lyr fill" id="qt5-f"></div><div class="lyr dk on" id="qt5-d"><div class="qi"><i class="ph-bold ph-airplane "></i></div><div class="ql">Airplane</div></div><div class="lyr white" id="qt5-w"><div class="qi"><i class="ph-bold ph-airplane "></i></div><div class="ql">Airplane</div></div></div>
+  <div class="qt on" id="qt6" style="left:10px;top:163px"><div class="lyr fill on" id="qt6-f"></div><div class="lyr dk" id="qt6-d"><div class="qi"><i class="ph-bold ph-sun "></i></div><div class="ql">Backlight</div></div><div class="lyr white on" id="qt6-w"><div class="qi"><i class="ph-bold ph-sun "></i></div><div class="ql">Backlight</div></div></div>
+  <div class="qt on" id="qt7" style="left:82px;top:163px"><div class="lyr fill on" id="qt7-f"></div><div class="lyr dk" id="qt7-d"><div class="qi"><i class="ph-bold ph-vibrate "></i></div><div class="ql">Vibrate</div></div><div class="lyr white on" id="qt7-w"><div class="qi"><i class="ph-bold ph-vibrate "></i></div><div class="ql">Vibrate</div></div></div>
+  <div class="qt" id="qt8" style="left:154px;top:163px"><div class="lyr fill" id="qt8-f"></div><div class="lyr dk on" id="qt8-d"><div class="qi"><i class="ph-bold ph-moon "></i></div><div class="ql">DND</div></div><div class="lyr white" id="qt8-w"><div class="qi"><i class="ph-bold ph-moon "></i></div><div class="ql">DND</div></div></div>
+  <div class="abs" style="left:10px;top:235px;font-size:16px"><i class="ph-bold ph-sun "></i></div>
+  <div class="seg" id="lv0" style="left:36px;top:235px"><div class="lyr fill on" id="lv0-f"></div></div>
+  <div class="seg" id="lv1" style="left:55px;top:235px"><div class="lyr fill on" id="lv1-f"></div></div>
+  <div class="seg" id="lv2" style="left:74px;top:235px"><div class="lyr fill on" id="lv2-f"></div></div>
+  <div class="seg" id="lv3" style="left:93px;top:235px"><div class="lyr fill on" id="lv3-f"></div></div>
+  <div class="seg" id="lv4" style="left:112px;top:235px"><div class="lyr fill on" id="lv4-f"></div></div>
+  <div class="seg" id="lv5" style="left:131px;top:235px"><div class="lyr fill on" id="lv5-f"></div></div>
+  <div class="seg" id="lv6" style="left:150px;top:235px"><div class="lyr fill" id="lv6-f"></div></div>
+  <div class="seg" id="lv7" style="left:169px;top:235px"><div class="lyr fill" id="lv7-f"></div></div>
+  <div class="seg" id="lv8" style="left:188px;top:235px"><div class="lyr fill" id="lv8-f"></div></div>
+  <div class="seg" id="lv9" style="left:207px;top:235px"><div class="lyr fill" id="lv9-f"></div></div>
+  <div class="abs t10" style="left:10px;top:257px;width:220px" id="q-battery">Battery 82%  ·  about 2 days left</div>
+</div>
+<div class="page" id="store">
+  <div class="title">Store</div>
+  <div class="abs" id="store-search" style="left:210px;top:3px;font-size:18px"><i class="ph-bold ph-magnifying-glass "></i></div>
+  <div class="chip " id="sc0" style="left:10px;top:30px;width:58px"><div class="lyr fill on" id="sc0-f"></div><div class="ct lyr" id="sc0-d">Featured</div><div class="ct white lyr on" id="sc0-w">Featured</div></div>
+  <div class="chip " id="sc1" style="left:72px;top:30px;width:38px"><div class="lyr fill" id="sc1-f"></div><div class="ct lyr on" id="sc1-d">Apps</div><div class="ct white lyr" id="sc1-w">Apps</div></div>
+  <div class="chip " id="sc2" style="left:114px;top:30px;width:58px"><div class="lyr fill" id="sc2-f"></div><div class="ct lyr on" id="sc2-d">Updates</div><div class="ct white lyr" id="sc2-w">Updates</div></div>
+  <div class="abs inv" id="store-banner" style="left:10px;top:55px;width:220px;height:56px;border:2px solid #000;border-radius:8px">
+    <div class="abs t10 b" style="left:10px;top:5px;width:180px" id="store-kicker">FEATURED</div><div class="abs t13 b" style="left:10px;top:18px;width:180px" id="store-btitle">LoRa Mesh Maps</div><div class="abs t10" style="left:10px;top:37px;width:180px" id="store-btext">Offline maps shared over the mesh</div>
+    <div class="abs" style="right:12px;top:18px;font-size:22px"><i class="ph-bold ph-map-pin "></i></div>
+  </div>
+  <div class="srow" id="s0" style="top:117px">
+    <div class="tile small" style="left:10px;top:4px;position:absolute"><i class="ph-bold ph-package "></i></div>
+    <div class="who" id="s0-title">Mailbox</div><div class="sub" id="s0-sub">IMAP, offline queue · 84 kB</div><div class="btn" id="s0-btn" style="right:10px;top:4px;width:36px">GET</div>
+    <div class="rule" style="left:10px;top:47px;width:220px"></div>
+  </div>
+  <div class="srow" id="s1" style="top:167px">
+    <div class="tile small" style="left:10px;top:4px;position:absolute"><i class="ph-bold ph-package "></i></div>
+    <div class="who" id="s1-title">Paper Reader</div><div class="sub" id="s1-sub">EPUB, TXT · 212 kB</div><div class="btn" id="s1-btn" style="right:10px;top:4px;width:42px">OPEN</div>
+    <div class="rule" style="left:10px;top:47px;width:220px"></div>
+  </div>
+  <div class="srow" id="s2" style="top:217px">
+    <div class="tile small" style="left:10px;top:4px;position:absolute"><i class="ph-bold ph-package "></i></div>
+    <div class="who" id="s2-title">Journal</div><div class="sub" id="s2-sub">Markdown notes · 66 kB</div><div class="btn" id="s2-btn" style="right:10px;top:4px;width:56px">UPDATE</div>
+    <div class="rule" style="left:10px;top:47px;width:220px"></div>
+  </div>
+</div>
+<div id="toast" class="hidden"><span id="toast-text">Toast</span></div>
+<div id="nav"><div class="nb" id="nav-back"><i class="ph-bold ph-caret-left "></i></div><div class="nb" id="nav-home"><i class="ph-bold ph-circle "></i></div><div class="nb" id="nav-apps"><i class="ph-bold ph-list "></i></div></div>
+</div>
+<script src="../../assets/dmod.js"></script>
+<script>
+/*
+ * The behaviour of the page (compiled by todmvs: nothing of it is interpreted on the device).
+ *
+ * The page knows nothing of the phone: what it shows comes from properties the application sets (dmod.prop), what the user does goes
+ * to the application as events (dmod.emit). The names are the contract - docs/contract.md. The page only moves between its own pages
+ * and shows the state it is told.
+ */
+
+/* Every character the application may send (the font of the view has only the characters of the page and of its scripts) */
+const CHARS = ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]_abcdefghijklmnopqrstuvwxyz{|}~·…✓ĄĆĘŁŃÓŚŹŻąćęłńóśźż';
+
+const pgHome = document.getElementById('home'), pgApps = document.getElementById('apps'), pgInbox = document.getElementById('inbox'),
+      pgChat = document.getElementById('chat'), pgQuick = document.getElementById('quick'), pgStore = document.getElementById('store');
+let page = 0;                               /* 0 home, 1 apps, 2 inbox, 3 chat, 4 quick settings, 5 store */
+
+function activate(el, on) {
+    if (on) el.classList.add('active'); else el.classList.remove('active');
+}
+function show(k) {
+    activate(pgHome, k === 0); activate(pgApps, k === 1); activate(pgInbox, k === 2);
+    activate(pgChat, k === 3); activate(pgQuick, k === 4); activate(pgStore, k === 5);
+    page = k;
+    dmod.emit('page', k);
+}
+function go(k) { if (k !== page) show(k); }
+/* back: a conversation to the inbox, the store to the applications, everything else to the home screen */
+function back() {
+    if (page === 3) show(2); else if (page === 5) show(1); else if (page !== 0) show(0);
+}
+
+function shown(el, on) {
+    if (on) el.classList.remove('hidden'); else el.classList.add('hidden');
+}
+function lit(el, on) {
+    if (on) el.classList.add('on'); else el.classList.remove('on');
+}
+
+/* ---- the channel ---------------------------------------------------------------------------------------------------------- */
+/* status */
+dmod.prop('clock', '09:41');
+dmod.prop('date', 'Saturday, 7 November');
+dmod.prop('battery', 82);
+dmod.prop('charging', 0);
+dmod.prop('signal', 4);
+dmod.prop('wifi', 1);
+dmod.prop('bt', 0);
+dmod.prop('gps', 1);
+dmod.prop('lora', 1);
+dmod.prop('toast', '');
+/* home */
+dmod.prop('home.line', '');
+/* quick settings */
+dmod.prop('q.level', 6);
+dmod.prop('q.battery', '');
+/* chat */
+dmod.prop('chat.title', '');
+dmod.prop('chat.sub', '');
+dmod.prop('chat.ini', '');
+dmod.prop('chat.stamp', '');
+dmod.prop('chat.state', '');
+/* store */
+dmod.prop('store.kicker', '');
+dmod.prop('store.title', '');
+dmod.prop('store.text', '');
+
+const stClock = document.getElementById('st-clock');
+const homeClock = document.getElementById('home-clock');
+dmod.onchange('clock', () => {
+    stClock.innerText = dmod.get('clock');
+    homeClock.innerText = dmod.get('clock');
+});
+const homeDate = document.getElementById('home-date');
+dmod.onchange('date', () => homeDate.innerText = dmod.get('date'));
+const homeLine = document.getElementById('home-line');
+dmod.onchange('home.line', () => homeLine.innerText = dmod.get('home.line'));
+
+/* signal: one of five icons */
+const sg0 = document.querySelector('.sg0'), sg1 = document.querySelector('.sg1'), sg2 = document.querySelector('.sg2'),
+      sg3 = document.querySelector('.sg3'), sg4 = document.querySelector('.sg4');
+function showSignal() {
+    const s = dmod.get('signal');
+    shown(sg0, s <= 0); shown(sg1, s === 1); shown(sg2, s === 2); shown(sg3, s === 3); shown(sg4, s >= 4);
+}
+dmod.onchange('signal', showSignal);
+dmod.onchange('wifi', () => shown(document.getElementById('st-wifi'), dmod.get('wifi')));
+dmod.onchange('bt', () => shown(document.getElementById('st-bt'), dmod.get('bt')));
+dmod.onchange('gps', () => shown(document.getElementById('st-gps'), dmod.get('gps')));
+dmod.onchange('lora', () => shown(document.getElementById('st-lora'), dmod.get('lora')));
+
+/* battery: the number and one of five icons, the charging one over them */
+const stPct = document.getElementById('st-pct');
+const bt0 = document.querySelector('.bt0'), bt1 = document.querySelector('.bt1'), bt2 = document.querySelector('.bt2'),
+      bt3 = document.querySelector('.bt3'), bt4 = document.querySelector('.bt4'), btc = document.querySelector('.btc');
+function showBattery() {
+    const b = dmod.get('battery'), c = dmod.get('charging');
+    stPct.innerText = String(b);
+    shown(bt0, !c && b < 10); shown(bt1, !c && b >= 10 && b < 35); shown(bt2, !c && b >= 35 && b < 65);
+    shown(bt3, !c && b >= 65 && b < 90); shown(bt4, !c && b >= 90); shown(btc, c);
+}
+dmod.onchange('battery', showBattery);
+dmod.onchange('charging', showBattery);
+
+/* the toast: a line at the bottom for two seconds */
+const toast = document.getElementById('toast');
+const toastText = document.getElementById('toast-text');
+let toastTimer = 0;
+function hideToast() { toast.classList.add('hidden'); toastTimer = 0; }
+dmod.onchange('toast', () => {
+    toastText.innerText = dmod.get('toast');
+    toast.classList.remove('hidden');
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(hideToast, 2200);
+});
+
+/* ---- home: three notifications ---------------------------------------------------------------------------------------------- */
+for (let i = 0; i < 3; i++) {
+    dmod.prop('n' + i + '.kind', 0);
+    dmod.prop('n' + i + '.title', '');
+    dmod.prop('n' + i + '.text', '');
+    dmod.prop('n' + i + '.time', '');
+    dmod.prop('n' + i + '.badge', 0);
+    const row = document.getElementById('n' + i);
+    const title = document.getElementById('n' + i + '-title'), text = document.getElementById('n' + i + '-text');
+    const time = document.getElementById('n' + i + '-time'), badge = document.getElementById('n' + i + '-badge');
+    const k1 = document.getElementById('n' + i + '-k1'), k2 = document.getElementById('n' + i + '-k2'), k3 = document.getElementById('n' + i + '-k3');
+    dmod.onchange('n' + i + '.kind', () => {
+        const k = dmod.get('n' + i + '.kind');
+        shown(row, k > 0); shown(k1, k === 1 || k === 4); shown(k2, k === 2); shown(k3, k === 3);
+    });
+    dmod.onchange('n' + i + '.title', () => title.innerText = dmod.get('n' + i + '.title'));
+    dmod.onchange('n' + i + '.text', () => text.innerText = dmod.get('n' + i + '.text'));
+    dmod.onchange('n' + i + '.time', () => time.innerText = dmod.get('n' + i + '.time'));
+    dmod.onchange('n' + i + '.badge', () => {
+        badge.innerText = String(dmod.get('n' + i + '.badge'));
+        shown(badge, dmod.get('n' + i + '.badge') > 0);
+    });
+}
+function openRow(i) { dmod.emit('notification', i); }
+function dock(i) {
+    if (i === 1) { go(2); } else if (i === 4) { go(1); } else { dmod.emit('launch', i); }
+}
+
+/* ---- apps ----------------------------------------------------------------------------------------------------------------------- */
+function launch(i) {
+    if (i === 1) { go(2); } else if (i === 11) { go(5); } else { dmod.emit('launch', i); }
+}
+const ap0 = document.getElementById('ap0'), ap1 = document.getElementById('ap1');
+const dot0 = document.getElementById('dot0-f'), dot1 = document.getElementById('dot1-f');
+function appsPage(p) {
+    shown(ap0, p === 0); shown(ap1, p === 1);
+    lit(dot0, p === 0); lit(dot1, p === 1);
+}
+/* a chip is a black layer and two texts, one of them shown */
+function chipSelect(prefix, i, selected) {
+    lit(document.getElementById(prefix + i + '-f'), selected);
+    lit(document.getElementById(prefix + i + '-w'), selected);
+    lit(document.getElementById(prefix + i + '-d'), !selected);
+}
+function appsFilter(k) {
+    for (let i = 0; i < 5; i++) chipSelect('ac', i, i === k);
+    dmod.emit('apps.filter', k);
+}
+
+/* ---- inbox ---------------------------------------------------------------------------------------------------------------------- */
+for (let i = 0; i < 5; i++) {
+    dmod.prop('m' + i + '.kind', 0);
+    dmod.prop('m' + i + '.initial', '');
+    dmod.prop('m' + i + '.title', '');
+    dmod.prop('m' + i + '.text', '');
+    dmod.prop('m' + i + '.time', '');
+    dmod.prop('m' + i + '.badge', 0);
+    const row = document.getElementById('m' + i);
+    const titleBold = document.getElementById('m' + i + '-titleb'), iniWhite = document.getElementById('m' + i + '-iniw');
+    const avFill = document.getElementById('m' + i + '-avf');
+    dmod.onchange('m' + i + '.kind', () => {
+        const k = dmod.get('m' + i + '.kind');
+        const tag = document.getElementById('m' + i + '-tagt');
+        shown(row, k > 0);
+        tag.innerText = k === 1 ? 'SMS' : k === 2 ? 'MESH' : k === 3 ? 'CALL' : 'CHAT';
+    });
+    const ini = document.getElementById('m' + i + '-ini'), title = document.getElementById('m' + i + '-title');
+    const text = document.getElementById('m' + i + '-text'), time = document.getElementById('m' + i + '-time');
+    const badge = document.getElementById('m' + i + '-badge');
+    dmod.onchange('m' + i + '.initial', () => { ini.innerText = dmod.get('m' + i + '.initial'); iniWhite.innerText = dmod.get('m' + i + '.initial'); });
+    dmod.onchange('m' + i + '.title', () => { title.innerText = dmod.get('m' + i + '.title'); titleBold.innerText = dmod.get('m' + i + '.title'); });
+    dmod.onchange('m' + i + '.text', () => text.innerText = dmod.get('m' + i + '.text'));
+    dmod.onchange('m' + i + '.time', () => time.innerText = dmod.get('m' + i + '.time'));
+    dmod.onchange('m' + i + '.badge', () => {
+        const n = dmod.get('m' + i + '.badge');
+        badge.innerText = String(n);
+        shown(badge, n > 0);
+        lit(avFill, n > 0); lit(iniWhite, n > 0); lit(ini, n <= 0); lit(titleBold, n > 0); lit(title, n <= 0);
+    });
+}
+function inboxTab(k) {
+    for (let i = 0; i < 4; i++) {
+        lit(document.getElementById('it' + i + '-n'), i !== k);
+        lit(document.getElementById('it' + i + '-b'), i === k);
+        lit(document.getElementById('it' + i + '-u'), i === k);
+    }
+    dmod.emit('inbox.tab', k);
+}
+function openThread(i) { dmod.emit('thread', i); go(3); }
+
+/* ---- chat ----------------------------------------------------------------------------------------------------------------------- */
+const chatTitle = document.getElementById('chat-title'), chatSub = document.getElementById('chat-sub');
+const chatIni = document.getElementById('chat-ini'), chatStamp = document.getElementById('chat-stamp');
+const chatState = document.getElementById('chat-state');
+dmod.onchange('chat.title', () => chatTitle.innerText = dmod.get('chat.title'));
+dmod.onchange('chat.sub', () => chatSub.innerText = dmod.get('chat.sub'));
+dmod.onchange('chat.ini', () => chatIni.innerText = dmod.get('chat.ini'));
+dmod.onchange('chat.stamp', () => chatStamp.innerText = dmod.get('chat.stamp'));
+dmod.onchange('chat.state', () => chatState.innerText = dmod.get('chat.state'));
+for (let i = 0; i < 4; i++) {
+    dmod.prop('c' + i + '.side', 0);
+    dmod.prop('c' + i + '.l1', '');
+    dmod.prop('c' + i + '.l2', '');
+    const them = document.getElementById('c' + i + 't'), mine = document.getElementById('c' + i + 'm');
+    const t1 = document.getElementById('c' + i + 't-l1'), t2 = document.getElementById('c' + i + 't-l2');
+    const m1 = document.getElementById('c' + i + 'm-l1'), m2 = document.getElementById('c' + i + 'm-l2');
+    dmod.onchange('c' + i + '.side', () => {
+        const s = dmod.get('c' + i + '.side');
+        shown(them, s === 1); shown(mine, s === 2);
+    });
+    dmod.onchange('c' + i + '.l1', () => { t1.innerText = dmod.get('c' + i + '.l1'); m1.innerText = dmod.get('c' + i + '.l1'); });
+    dmod.onchange('c' + i + '.l2', () => { t2.innerText = dmod.get('c' + i + '.l2'); m2.innerText = dmod.get('c' + i + '.l2'); });
+}
+
+/* ---- quick settings ------------------------------------------------------------------------------------------------------------- */
+for (let i = 0; i < 9; i++) {
+    dmod.prop('q' + i, 0);
+    const tile = document.getElementById('qt' + i);
+    const fill = document.getElementById('qt' + i + '-f'), white = document.getElementById('qt' + i + '-w'), dark = document.getElementById('qt' + i + '-d');
+    dmod.onchange('q' + i, () => { lit(tile, dmod.get('q' + i)); lit(fill, dmod.get('q' + i)); lit(white, dmod.get('q' + i)); lit(dark, !dmod.get('q' + i)); });
+}
+for (let i = 0; i < 10; i++) {
+    const seg = document.getElementById('lv' + i + '-f');
+    dmod.onchange('q.level', () => lit(seg, i < dmod.get('q.level')));
+}
+const qBattery = document.getElementById('q-battery');
+dmod.onchange('q.battery', () => qBattery.innerText = dmod.get('q.battery'));
+
+/* ---- store ---------------------------------------------------------------------------------------------------------------------- */
+const sKicker = document.getElementById('store-kicker'), sBTitle = document.getElementById('store-btitle'), sBText = document.getElementById('store-btext');
+dmod.onchange('store.kicker', () => sKicker.innerText = dmod.get('store.kicker'));
+dmod.onchange('store.title', () => sBTitle.innerText = dmod.get('store.title'));
+dmod.onchange('store.text', () => sBText.innerText = dmod.get('store.text'));
+for (let i = 0; i < 3; i++) {
+    dmod.prop('s' + i + '.kind', 0);
+    dmod.prop('s' + i + '.title', '');
+    dmod.prop('s' + i + '.sub', '');
+    dmod.prop('s' + i + '.button', '');
+    const row = document.getElementById('s' + i);
+    const title = document.getElementById('s' + i + '-title'), sub = document.getElementById('s' + i + '-sub'), btn = document.getElementById('s' + i + '-btn');
+    dmod.onchange('s' + i + '.kind', () => shown(row, dmod.get('s' + i + '.kind') > 0));
+    dmod.onchange('s' + i + '.title', () => title.innerText = dmod.get('s' + i + '.title'));
+    dmod.onchange('s' + i + '.sub', () => sub.innerText = dmod.get('s' + i + '.sub'));
+    dmod.onchange('s' + i + '.button', () => btn.innerText = dmod.get('s' + i + '.button'));
+}
+function storeTab(k) {
+    for (let i = 0; i < 3; i++) chipSelect('sc', i, i === k);
+    dmod.emit('store.tab', k);
+}
+
+/* ---- what is touched ------------------------------------------------------------------------------------------------------------ */
+document.getElementById('nav-back').onclick = () => back();
+document.getElementById('nav-home').onclick = () => go(0);
+document.getElementById('nav-apps').onclick = () => go(1);
+document.getElementById('st-clock').onclick = () => go(4);          /* the status bar opens the quick settings */
+document.getElementById('search').onclick = () => dmod.emit('search');
+document.getElementById('apps-search').onclick = () => dmod.emit('search');
+document.getElementById('inbox-search').onclick = () => dmod.emit('search');
+document.getElementById('inbox-compose').onclick = () => dmod.emit('compose');
+document.getElementById('store-search').onclick = () => dmod.emit('search');
+document.getElementById('store-banner').onclick = () => dmod.emit('banner');
+document.getElementById('chat-back').onclick = () => back();
+document.getElementById('chat-call').onclick = () => dmod.emit('call');
+document.getElementById('chat-send').onclick = () => dmod.emit('send');
+for (let i = 0; i < 3; i++) {
+    document.getElementById('n' + i).onclick = () => openRow(i);
+    document.getElementById('s' + i + '-btn').onclick = () => dmod.emit('store.action', i);
+    document.getElementById('sc' + i).onclick = () => storeTab(i);
+}
+for (let i = 0; i < 5; i++) {
+    document.getElementById('dock' + i).onclick = () => dock(i);
+    document.getElementById('ac' + i).onclick = () => appsFilter(i);
+    document.getElementById('m' + i).onclick = () => openThread(i);
+}
+for (let i = 0; i < 4; i++) document.getElementById('it' + i).onclick = () => inboxTab(i);
+for (let i = 0; i < 2; i++) document.getElementById('dot' + i).onclick = () => appsPage(i);
+for (let i = 0; i < 24; i++) document.getElementById('app' + i).onclick = () => launch(i);
+for (let i = 0; i < 9; i++) document.getElementById('qt' + i).onclick = () => dmod.emit('quick', i);
+for (let i = 0; i < 10; i++) document.getElementById('lv' + i).onclick = () => dmod.emit('level', i + 1);
+</script>
+</body>
+</html>

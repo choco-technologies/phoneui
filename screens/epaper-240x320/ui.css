@@ -1,0 +1,131 @@
+/*
+ * phoneui for a 240 x 320 e-paper (T-Deck Pro): black and white only, no animation, no shadows. State is shown by inversion (black = on),
+ * lines are 2 px, text is at least 10 px and never thinner than the weight 600 (white on black: 700) (the display has no gray: thin strokes would be lost).
+ * Every element is placed by pixels.
+ *
+ * What changes while the view runs is a layer shown by its opacity (.lyr, .on): the converter handles a change of opacity - not of how
+ * an element looks - so an inverted tile is a black layer over its outline and two texts, of which one is shown.
+ */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 240px; height: 320px; background: #fff; color: #000; font-family: 'Inter'; font-weight: 600; overflow: hidden; }
+body { font-size: 12px; line-height: 1.2; }
+#phoneui-screen { position: relative; width: 240px; height: 320px; background: #fff; overflow: hidden; }
+.abs { position: absolute; }
+.hidden { opacity: 0; pointer-events: none; }
+.lyr { opacity: 0; pointer-events: none; }
+.lyr.on { opacity: 1; }
+.ph { font-family: 'Phosphor-Bold'; font-weight: normal; line-height: 1; }
+
+/* text */
+.t10 { font-size: 10px; } .t11 { font-size: 11px; } .t12 { font-size: 12px; } .t13 { font-size: 13px; } .t16 { font-size: 16px; }
+.b { font-weight: 700; }
+.nowrap { white-space: nowrap; overflow: hidden; }
+.inv { background: #000; color: #fff; font-weight: 700; }
+.white { color: #fff; font-weight: 700; }
+.fill { position: absolute; left: 0; top: 0; right: 0; bottom: 0; background: #000; }
+
+/* status bar and navigation */
+#status { position: absolute; left: 0; top: 0; width: 240px; height: 19px; background: #fff; border-bottom: 1px solid #000; z-index: 9; }
+#status .clock { position: absolute; left: 8px; top: 2px; font-size: 12px; font-weight: 700; }
+#status .ico { position: absolute; top: 2px; font-size: 13px; }
+#status .sg { left: 124px; }
+#status #st-wifi { left: 142px; } #status #st-lora { left: 158px; } #status #st-gps { left: 174px; } #status #st-bt { left: 188px; }
+#status .pct { position: absolute; left: 196px; width: 20px; top: 3px; font-size: 10px; font-weight: 700; text-align: right; }
+#status .bt { left: 220px; }
+#nav { position: absolute; left: 0; top: 294px; width: 240px; height: 26px; background: #fff; border-top: 1px solid #000; z-index: 9; display: flex; }
+#nav .nb { width: 80px; height: 25px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+
+/* pages */
+.page { position: absolute; left: 0; top: 19px; width: 240px; height: 275px; background: #fff; opacity: 0; pointer-events: none; }
+.page.active { opacity: 1; pointer-events: auto; z-index: 5; }
+.title { position: absolute; left: 10px; top: 4px; font-size: 16px; font-weight: 700; }
+
+/* tiles: the icons of the applications */
+.tile { width: 38px; height: 38px; border: 2px solid #000; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+.tile.small { width: 36px; height: 36px; }
+.tile.dock { position: absolute; }
+
+/* chips, buttons, badges */
+.chip { position: absolute; height: 18px; border: 1px solid #000; border-radius: 9px; overflow: hidden; }
+.chip .fill { border-radius: 9px; }
+.chip .ct { position: absolute; left: 0; top: 0; width: 100%; text-align: center; font-size: 10px; font-weight: 600; line-height: 16px; white-space: nowrap; }
+.btn { position: absolute; border: 2px solid #000; border-radius: 8px; font-size: 9px; font-weight: 700; line-height: 12px; height: 16px; text-align: center; }
+.pill { position: absolute; height: 14px; min-width: 20px; padding: 0 5px; border-radius: 7px; background: #000; color: #fff; font-size: 10px; font-weight: 700; line-height: 14px; text-align: center; }
+.rule { position: absolute; height: 1px; background: #000; }
+.rule2 { position: absolute; height: 2px; background: #000; }
+
+/* common rows */
+.who { position: absolute; font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; }
+.who.bold { font-weight: 700; }
+.txt, .sub { position: absolute; font-size: 10px; white-space: nowrap; overflow: hidden; }
+.tm { position: absolute; font-size: 10px; right: 10px; width: 70px; text-align: right; }
+
+/* home */
+#home .big { left: 10px; top: 2px; font-size: 46px; font-weight: 700; line-height: 1; letter-spacing: -1px; }
+#home .nrow { position: absolute; left: 0; width: 240px; height: 37px; }
+#home .nrow .ico { position: absolute; left: 10px; top: 6px; font-size: 22px; }
+#home .nrow .who { left: 42px; top: 2px; width: 150px; font-weight: 700; }
+#home .nrow .txt { left: 42px; top: 18px; width: 150px; }
+#home .nrow .tm { top: 3px; }
+#search { position: absolute; left: 10px; top: 205px; width: 220px; height: 22px; border: 2px solid #000; border-radius: 11px; font-size: 12px; }
+#search .ph { position: absolute; left: 8px; top: 3px; font-size: 14px; }
+#search .hint { position: absolute; left: 30px; top: 2px; }
+
+/* apps */
+.app { position: absolute; width: 60px; height: 60px; }
+.app .tile { position: absolute; left: 11px; top: 0; }
+.app .lbl { position: absolute; left: 0; top: 43px; width: 60px; font-size: 10px; text-align: center; white-space: nowrap; }
+.dot { position: absolute; width: 8px; height: 8px; border: 1px solid #000; border-radius: 4px; overflow: hidden; }
+
+/* inbox */
+.tab { position: absolute; height: 20px; }
+.tab .tl { position: absolute; left: 0; top: 0; font-size: 12px; font-weight: 500; white-space: nowrap; }
+.tab .tl.bold { font-weight: 700; }
+.tab .ul { position: absolute; left: 0; top: 17px; width: 100%; height: 3px; background: #000; }
+.mrow { position: absolute; left: 0; width: 240px; height: 44px; }
+.mrow .av { position: absolute; left: 10px; top: 6px; width: 26px; height: 26px; border: 2px solid #000; border-radius: 13px; overflow: hidden; }
+.mrow .av .ini { position: absolute; left: 0; top: 2px; width: 22px; text-align: center; font-size: 13px; font-weight: 700; }
+.mrow .who { left: 44px; top: 3px; width: 110px; }
+.mrow .tag { position: absolute; right: 10px; top: 22px; height: 11px; border: 1px solid #000; border-radius: 3px; font-size: 9px; font-weight: 600; line-height: 9px; padding: 0 3px; white-space: nowrap; }
+.mrow .tm { top: 4px; }
+.mrow .txt { left: 44px; top: 21px; width: 124px; }
+
+/* chat */
+.bub { position: absolute; width: 190px; height: 40px; border: 2px solid #000; border-radius: 8px; }
+.bub .bl { position: absolute; left: 8px; width: 160px; font-size: 12px; white-space: nowrap; overflow: hidden; height: 15px; }
+.bub .bl:first-child { top: 4px; }
+.bub .bl:last-child { top: 19px; }
+
+/* quick settings */
+.qt { position: absolute; width: 68px; height: 60px; border: 2px solid #000; border-radius: 8px; overflow: hidden; }
+.qt .lyr { position: absolute; left: 0; top: 0; width: 64px; height: 56px; }
+.qt .qi { position: absolute; left: 0; top: 9px; width: 64px; text-align: center; font-size: 22px; }
+.qt .ql { position: absolute; left: 0; top: 35px; width: 64px; text-align: center; font-size: 10px; font-weight: 600; white-space: nowrap; }
+.seg { position: absolute; width: 17px; height: 10px; border: 2px solid #000; border-radius: 3px; overflow: hidden; }
+
+/* store */
+.srow { position: absolute; left: 0; width: 240px; height: 50px; }
+.srow .who { left: 54px; top: 5px; width: 120px; font-weight: 700; }
+.srow .sub { left: 54px; top: 21px; width: 124px; font-size: 9px; }
+
+/* toast */
+#toast { position: absolute; left: 20px; top: 262px; width: 200px; height: 26px; background: #000; color: #fff; border-radius: 13px; z-index: 10;
+         font-size: 11px; font-weight: 700; text-align: center; line-height: 26px; }
+
+/*
+ * Pressed: an e-paper has no hover and shows a touch only when it is redrawn - a pressed button is inverted. Rows and tiles turn black.
+ * The converter handles a pressed look made of colors and backgrounds, not of opacity: a layered widget (chip, tab) turns its root and its
+ * visible layer's colors the other way - the black fill of a selected one becomes white. The tiles of the quick settings have none: the
+ * state they change to comes back through the application (too late for the settle time of the display), and the flip itself is the feedback.
+ */
+#nav .nb:active, .tile:active, .app:active .tile, .btn:active, #search:active, #apps-search:active,
+.nrow:active, .mrow:active, #st-clock:active, #chat-back:active, #chat-call:active, #inbox-search:active, #store-search:active,
+.tab:active, .chip:active, .dot:active, .seg:active { background: #000; color: #fff; }
+.inv:active { background: #fff; color: #000; }
+.nrow:active .pill, .mrow:active .pill { background: #fff; color: #000; }
+.mrow:active .av { border-color: #fff; }
+.mrow:active .ini, .mrow:active .who, .mrow:active .who.bold { color: #fff; }
+.mrow:active .tag { border-color: #fff; }
+.tab:active .tl, .chip:active .ct { color: #fff; }
+.chip:active .fill { background: #fff; }
+.chip:active .ct.white { color: #000; }

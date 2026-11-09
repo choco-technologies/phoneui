@@ -24,6 +24,8 @@ typedef struct
     uint32_t        failed;         /* sets the view did not take: it has no such property (the contract is broken) */
 } cache_t;
 
+#define TYPED_MAX       36U                         /* Bytes of the text of the search bar */
+
 struct ui
 {
     cache_t             cache;
@@ -33,6 +35,7 @@ struct ui
     int                 thread_tab;         /* the tab and the row of the open conversation */
     int                 thread_row;
     unsigned            toasts;
+    char                typed[TYPED_MAX + 1];   /* What the keyboard wrote (UTF-8) */
 };
 
 static cache_entry_t* cache_find(cache_t* cache, const char* name)
@@ -211,6 +214,81 @@ static void toast(ui_t ui, const char* message)
 }
 
 /* What the view asked for */
+/* The characters the keyboard writes: appended to the search bar of the home page (UTF-8) */
+static void show_typed(ui_t ui)
+{
+    set_text(&ui->cache, "search.text", ui->typed);
+    set_int(&ui->cache, "search.on", ui->typed[0] != '\0');
+}
+
+static unsigned encode_utf8(uint32_t cp, char* out)
+{
+    if (cp < 0x80U)
+    {
+        out[0] = (char)cp;
+        return 1;
+    }
+    if (cp < 0x800U)
+    {
+        out[0] = (char)(0xC0U | (cp >> 6));
+        out[1] = (char)(0x80U | (cp & 0x3FU));
+        return 2;
+    }
+    if (cp < 0x10000U)
+    {
+        out[0] = (char)(0xE0U | (cp >> 12));
+        out[1] = (char)(0x80U | ((cp >> 6) & 0x3FU));
+        out[2] = (char)(0x80U | (cp & 0x3FU));
+        return 3;
+    }
+    out[0] = (char)(0xF0U | (cp >> 18));
+    out[1] = (char)(0x80U | ((cp >> 12) & 0x3FU));
+    out[2] = (char)(0x80U | ((cp >> 6) & 0x3FU));
+    out[3] = (char)(0x80U | (cp & 0x3FU));
+    return 4;
+}
+
+static void type_char(ui_t ui, uint32_t codepoint)
+{
+    char bytes[4];
+    size_t length = strlen(ui->typed);
+    unsigned n = encode_utf8(codepoint, bytes);
+    if (length + n > TYPED_MAX)
+        return;                                                 /* the bar is full */
+    memcpy(ui->typed + length, bytes, n);
+    ui->typed[length + n] = '\0';
+    show_typed(ui);
+}
+
+static void type_erase(ui_t ui)
+{
+    size_t length = strlen(ui->typed);
+    while (length > 0 && ((uint8_t)ui->typed[length - 1U] & 0xC0U) == 0x80U)
+        length--;                                               /* the bytes of a character go together */
+    if (length > 0)
+        length--;
+    ui->typed[length] = '\0';
+    show_typed(ui);
+}
+
+/* A key the keyboard gave that is no character: Backspace, Enter, Escape */
+static void type_key(ui_t ui, int code, char* message, size_t size)
+{
+    if (code == 0x2A)
+        type_erase(ui);
+    else if (code == 0x29)
+    {
+        ui->typed[0] = '\0';
+        show_typed(ui);
+    }
+    else if (code == 0x28 && ui->typed[0] != '\0')
+    {
+        Dmod_SnPrintf(message, size, "Search: %s", ui->typed);
+        ui->typed[0] = '\0';
+        show_typed(ui);
+    }
+}
+
 void ui_handle(ui_t ui, const libdmview_event_t* ev)
 {
     char message[VALUE_MAX_LEN] = "";
@@ -253,8 +331,12 @@ void ui_handle(ui_t ui, const libdmview_event_t* ev)
         phoneui_backend_store_action(ui->backend, ui->store_tab, value, message, sizeof(message));
         show_store(ui);
     }
-    else if (strcmp(name, "notification") == 0 || strcmp(name, "apps.filter") == 0)
+    else if (strcmp(name, "notification") == 0 || strcmp(name, "apps.filter") == 0 || strcmp(name, "mods") == 0)
         ;                                                       /* nothing to do yet */
+    else if (strcmp(name, "char") == 0)
+        type_char(ui, (uint32_t)ev->value);
+    else if (strcmp(name, "key") == 0)
+        type_key(ui, value, message, sizeof(message));
     else
         phoneui_backend_request(ui->backend, name, message, sizeof(message));
     if (message[0] != '\0')

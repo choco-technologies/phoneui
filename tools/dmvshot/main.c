@@ -14,6 +14,7 @@
  *
  * steps:   shot:<name>      write <name>.ppm (what libdmview drew) and <name>-mono.ppm (what the e-paper shows of it)
  *          click:<x>,<y>    a touch and its lifting
+ *          emit:<name>:<value>  an event as if libdmview_key sent it (char, key, mods)
  *          swipe:<x0>,<y0>,<x1>,<y1>  a finger that moves from the first point to the second
  *          press:<x>,<y>    a touch that stays (a pressed button); release: lifts it
  *          wait:<ms>        let the time pass (timers, the toast)
@@ -220,6 +221,21 @@ int main(int argc, char* argv[])
                     end++;
             }
             swipe(&s, v[0], v[1], v[2], v[3]);
+        }
+        else if (strncmp(step, "emit:", 5) == 0)
+        {
+            /* An event as if the claim's view (or libdmview_key) sent it: emit:<name>:<value> */
+            libdmview_event_t ev;
+            memset(&ev, 0, sizeof(ev));
+            size_t n = 0;
+            while (step[5 + n] != '\0' && step[5 + n] != ':' && n < sizeof(ev.name) - 1U)
+            {
+                ev.name[n] = step[5 + n];
+                n++;
+            }
+            ev.value = (step[5 + n] == ':') ? (int32_t)number(step + 5 + n + 1, NULL) : 0;
+            ui_handle(s.ui, &ev);
+            settle(&s, 300);
         }
         else if (strncmp(step, "expect:", 7) == 0)
         {

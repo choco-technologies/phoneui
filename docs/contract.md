@@ -15,6 +15,7 @@ Texts are at most 48 bytes (a property holds 64).
 | `clock` | text `"09:41"` | the status bar and the big clock of the home screen |
 | `date` | text | the date under the clock |
 | `home.line` | text | the line under the date (the mesh, the GPS) |
+| `search.text`, `search.on` | text, 0/1 | what the keyboard wrote and whether the search bar of the home page shows it (else its hint) |
 | `battery` | 0..100 | the number and one of five icons in the status bar |
 | `charging` | 0/1 | the charging icon instead of the battery's |
 | `signal` | 0..4 | the bars of the cellular network |
@@ -44,6 +45,9 @@ Texts are at most 48 bytes (a property holds 64).
 | `launch` | the application's number (0..23, the order of the list) | an application's tile or a dock tile was touched (the pages that exist - the inbox, the store - open by themselves) |
 | `notification` | the row | a notification of the home screen |
 | `apps.filter` | 0 all, 1 comms, 2 tools, 3 media, 4 more | a filter chip of the list |
+| `char` | Unicode | a key that gives a character went down (from libdmview_key): the application writes it in the search bar |
+| `key` | USB HID usage | a key that gives none went down: Backspace erases, Escape clears, Enter takes the text (a toast) |
+| `mods` | bits | the modifiers changed (shift 1, ctrl 2, alt 4, sym 8, caps 16) - not used yet |
 | `inbox.tab` | 0 all, 1 sms, 2 mesh, 3 chats | a tab of the inbox: the application sets the rows of the filtered list |
 | `thread` | the row of the filtered list | a conversation was opened (the view opens its page) |
 | `compose`, `call`, `send`, `search`, `banner` | 0 | the buttons of that name |

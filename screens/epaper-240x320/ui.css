@@ -12,6 +12,10 @@ body { font-size: 12px; line-height: 1.2; }
 #phoneui-screen { position: relative; width: 240px; height: 320px; background: #fff; overflow: hidden; }
 .abs { position: absolute; }
 .hidden { opacity: 0; pointer-events: none; }
+#pager { position: absolute; left: 0; top: 62px; width: 240px; height: 190px; overflow-x: auto; overflow-y: hidden; }
+#pgs { position: relative; width: 480px; height: 190px; }
+.appspage { position: absolute; top: 0; width: 240px; height: 190px; }
+#ap0 { left: 0; }
 .lyr { opacity: 0; pointer-events: none; }
 .lyr.on { opacity: 1; }
 .ph { font-family: 'Phosphor-Bold'; font-weight: normal; line-height: 1; }
@@ -75,7 +79,8 @@ body { font-size: 12px; line-height: 1.2; }
 .app { position: absolute; width: 60px; height: 60px; }
 .app .tile { position: absolute; left: 11px; top: 0; }
 .app .lbl { position: absolute; left: 0; top: 43px; width: 60px; font-size: 10px; text-align: center; white-space: nowrap; }
-.dot { position: absolute; width: 8px; height: 8px; border: 1px solid #000; border-radius: 4px; overflow: hidden; }
+.dot { position: absolute; width: 120px; height: 23px; }
+.pip { position: absolute; width: 8px; height: 8px; border: 1px solid #000; border-radius: 4px; overflow: hidden; }
 
 /* inbox */
 .tab { position: absolute; height: 20px; }
@@ -120,7 +125,7 @@ body { font-size: 12px; line-height: 1.2; }
  */
 #nav .nb:active, .tile:active, .app:active .tile, .btn:active, #search:active, #apps-search:active,
 .nrow:active, .mrow:active, #st-clock:active, #chat-back:active, #chat-call:active, #inbox-search:active, #store-search:active,
-.tab:active, .chip:active, .dot:active, .seg:active { background: #000; color: #fff; }
+.tab:active, .chip:active, .seg:active { background: #000; color: #fff; }
 .inv:active { background: #fff; color: #000; }
 .nrow:active .pill, .mrow:active .pill { background: #fff; color: #000; }
 .mrow:active .av { border-color: #fff; }

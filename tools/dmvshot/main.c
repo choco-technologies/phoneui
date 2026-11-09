@@ -14,6 +14,7 @@
  *
  * steps:   shot:<name>      write <name>.ppm (what libdmview drew) and <name>-mono.ppm (what the e-paper shows of it)
  *          click:<x>,<y>    a touch and its lifting
+ *          swipe:<x0>,<y0>,<x1>,<y1>  a finger that moves from the first point to the second
  *          press:<x>,<y>    a touch that stays (a pressed button); release: lifts it
  *          wait:<ms>        let the time pass (timers, the toast)
  *          expect:<name>[:<value>]  the last event of the view was that one (else the exit code says so)
@@ -134,6 +135,22 @@ static void touch(shot_t* s, uint16_t x, uint16_t y, uint8_t event)
     (void)libdmview_input(s->view, &st, s->now);
 }
 
+/* A finger down at x0,y0 that moves to x1,y1 in steps of a few pixels and is lifted */
+static void swipe(shot_t* s, long x0, long y0, long x1, long y1)
+{
+    touch(s, (uint16_t)x0, (uint16_t)y0, DMDRVI_INPUT_CONTACT_DOWN);
+    settle(s, 3 * STEP_MS);
+    for (int k = 1; k <= 10; k++)
+    {
+        touch(s, (uint16_t)(x0 + (x1 - x0) * k / 10), (uint16_t)(y0 + (y1 - y0) * k / 10), DMDRVI_INPUT_CONTACT_MOVE);
+        settle(s, 2 * STEP_MS);
+    }
+    touch(s, (uint16_t)x1, (uint16_t)y1, DMDRVI_INPUT_CONTACT_UP);
+    settle(s, 3 * STEP_MS);
+    touch(s, 0, 0, DMDRVI_INPUT_CONTACT_UP + 1);
+    settle(s, 3 * STEP_MS);
+}
+
 static void click(shot_t* s, uint16_t x, uint16_t y)
 {
     touch(s, x, y, DMDRVI_INPUT_CONTACT_DOWN);
@@ -191,6 +208,18 @@ int main(int argc, char* argv[])
             long x = number(step + 6, &end);
             long y = (*end == ',') ? number(end + 1, NULL) : 0;
             click(&s, (uint16_t)x, (uint16_t)y);
+        }
+        else if (strncmp(step, "swipe:", 6) == 0)
+        {
+            const char* end = step + 6;
+            long v[4];
+            for (int k = 0; k < 4; k++)
+            {
+                v[k] = number(end, &end);
+                if (*end == ',')
+                    end++;
+            }
+            swipe(&s, v[0], v[1], v[2], v[3]);
         }
         else if (strncmp(step, "expect:", 7) == 0)
         {

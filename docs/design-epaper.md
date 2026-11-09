@@ -11,7 +11,7 @@ for that, and for what the converter (`todmvs`: `dmvs_html` + `dmvs_js`) can do.
 - **Targets of 36 px and more**, and three buttons that are always there: back, home, applications. The status bar opens the quick settings.
 - **A pressed button is inverted** (`:active` in `ui.css`, which the converter turns into the look of `$box.pressed`): an e-paper has no hover and
   shows a touch only when it is redrawn, so the feedback comes with the first partial refresh (0.7 s). Rows and tiles turn black, an inverted
-  (selected, on) one turns white. A layered widget (chip, tab, tile) cannot do it with opacity - the converter handles a pressed look of colors and
+  (selected, on) one turns white. The tiles of the quick settings are the exception: their state comes back through the application, too late for a display that merges what is presented within 150 ms, and the flip is the feedback. A layered widget (chip, tab) cannot do it with opacity - the converter handles a pressed look of colors and
   backgrounds only - so its root and its visible layer swap colors.
 - **The keyboard first** (the second step): the search bar is the way to anything the grid does not show.
 

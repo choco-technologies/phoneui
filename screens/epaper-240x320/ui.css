@@ -76,7 +76,7 @@ body { font-size: 12px; line-height: 1.2; }
 .app { position: absolute; width: 60px; height: 60px; }
 .app .tile { position: absolute; left: 11px; top: 0; }
 .app .lbl { position: absolute; left: 0; top: 43px; width: 60px; font-size: 10px; text-align: center; white-space: nowrap; }
-.dot { position: absolute; width: 80px; height: 13px; }
+.dot { position: absolute; width: 120px; height: 23px; }
 .pip { position: absolute; width: 8px; height: 8px; border: 1px solid #000; border-radius: 4px; overflow: hidden; }
 
 /* inbox */

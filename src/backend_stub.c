@@ -1,12 +1,42 @@
 #include "dmod.h"
+#include "dmdrvi_ioctl.h"
 #include "phoneui_backend.h"
 #include <string.h>
 #include <errno.h>
 
 /*
  * The stub backend: made-up data in the shape of the real one. Nothing is done: the quick settings tiles and the backlight keep what
- * they were set to, the store "installs" nothing, the applications are not there. See phoneui_backend.h.
+ * they were set to, the store "installs" nothing, the applications are not there. Except the Wi-Fi, which is real: its tile and the icon of
+ * the status bar are the node of the Wi-Fi driver (wifi_* below). See phoneui_backend.h.
  */
+
+/* ---- The Wi-Fi: the node of the driver (the interface wlan0: /dev/wlan0, where the `wifi` tool looks for it) ---- */
+
+#define WIFI_NODE       "/dev/wlan0"
+#define WIFI_TILE       0                       /* the first tile of the quick settings */
+
+/* The state of the radio; a negative errno when there is no such node (no Wi-Fi driver) or it does not answer */
+static int wifi_status(dmdrvi_wifi_status_t* status)
+{
+    void* node = Dmod_FileOpen(WIFI_NODE, "r+");
+    if (node == NULL)
+        return -ENODEV;
+    memset(status, 0, sizeof(*status));
+    int ret = Dmod_Ioctl(node, DMDRVI_IOCTL_WIFI_GET_STATUS, status);
+    Dmod_FileClose(node);
+    return ret;
+}
+
+static int wifi_set_enabled(bool enabled)
+{
+    void* node = Dmod_FileOpen(WIFI_NODE, "r+");
+    if (node == NULL)
+        return -ENODEV;
+    int value = enabled ? 1 : 0;
+    int ret = Dmod_Ioctl(node, DMDRVI_IOCTL_WIFI_SET_ENABLED, &value);
+    Dmod_FileClose(node);
+    return ret;
+}
 
 struct phoneui_backend
 {
@@ -74,7 +104,8 @@ void phoneui_backend_status(phoneui_backend_t backend, phoneui_status_t* status)
     copy(status->line, sizeof(status->line), "3 mesh nodes  ·  GPS fix");
     status->battery = 82;
     status->signal = 4;
-    status->wifi = backend->on[0];
+    dmdrvi_wifi_status_t wifi;
+    status->wifi = (wifi_status(&wifi) == 0 && wifi.state == DMDRVI_WIFI_STATE_CONNECTED) ? 1 : 0;
     status->bt = backend->on[2];
     status->gps = backend->on[4];
     status->lora = backend->on[3];
@@ -161,14 +192,31 @@ void phoneui_backend_thread(phoneui_backend_t backend, int tab, int row, phoneui
 void phoneui_backend_quick(phoneui_backend_t backend, phoneui_quick_t* quick)
 {
     memcpy(quick->on, backend->on, sizeof(quick->on));
+    dmdrvi_wifi_status_t wifi;
+    quick->on[WIFI_TILE] = (wifi_status(&wifi) == 0 && wifi.state != DMDRVI_WIFI_STATE_OFF) ? 1 : 0;
     quick->level = backend->level;
     copy(quick->battery, sizeof(quick->battery), "Battery 82%  ·  about 2 days left");
 }
 
-void phoneui_backend_quick_toggle(phoneui_backend_t backend, int tile)
+void phoneui_backend_quick_toggle(phoneui_backend_t backend, int tile, char* message, size_t size)
 {
-    if (tile >= 0 && tile < (int)PHONEUI_QUICK)
-        backend->on[tile] = !backend->on[tile];
+    if (tile < 0 || tile >= (int)PHONEUI_QUICK)
+        return;
+    if (tile == WIFI_TILE)
+    {
+        dmdrvi_wifi_status_t wifi;
+        int ret = wifi_status(&wifi);
+        if (ret == 0)
+            ret = wifi_set_enabled(wifi.state == DMDRVI_WIFI_STATE_OFF);        /* off: on, anything else: off */
+        if (ret == -ENODEV)
+            copy(message, size, "Wi-Fi: not available");
+        else if (ret == -EBUSY)
+            copy(message, size, "Wi-Fi: starting, try again");
+        else if (ret != 0)
+            Dmod_SnPrintf(message, size, "Wi-Fi: cannot switch (%d)", ret);
+        return;
+    }
+    backend->on[tile] = !backend->on[tile];
 }
 
 void phoneui_backend_quick_level(phoneui_backend_t backend, int level)

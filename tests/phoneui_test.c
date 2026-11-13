@@ -86,18 +86,39 @@ DMOD_TEST_STEP(quick_settings_keep_state)
 {
     phoneui_backend_t backend = fresh();
     phoneui_quick_t q;
+    char message[64] = "";
     phoneui_backend_quick(backend, &q);
     int before = q.on[2];
-    phoneui_backend_quick_toggle(backend, 2);
+    phoneui_backend_quick_toggle(backend, 2, message, sizeof(message));
     phoneui_backend_quick(backend, &q);
     DMOD_TEST_EXPECT_EQ(q.on[2], !before);
-    phoneui_backend_quick_toggle(backend, 99);                  /* out of range: ignored */
+    DMOD_TEST_EXPECT_EQ(message[0], '\0');                      /* (what is done says nothing) */
+    phoneui_backend_quick_toggle(backend, 99, message, sizeof(message));    /* out of range: ignored */
+    DMOD_TEST_EXPECT_EQ(message[0], '\0');
     phoneui_backend_quick_level(backend, 3);
     phoneui_backend_quick(backend, &q);
     DMOD_TEST_EXPECT_EQ(q.level, 3);
     phoneui_backend_quick_level(backend, 11);                   /* out of range: ignored */
     phoneui_backend_quick(backend, &q);
     DMOD_TEST_EXPECT_EQ(q.level, 3);
+    phoneui_backend_free(backend);
+}
+
+/* The Wi-Fi tile is the node of the driver: on the host there is none, so it is off, the icon is hidden and a tap says so */
+DMOD_TEST_STEP(wifi_tile_without_a_node)
+{
+    phoneui_backend_t backend = fresh();
+    phoneui_quick_t q;
+    phoneui_status_t s;
+    char message[64] = "";
+    phoneui_backend_quick(backend, &q);
+    DMOD_TEST_EXPECT_EQ(q.on[0], 0);
+    phoneui_backend_status(backend, &s);
+    DMOD_TEST_EXPECT_EQ(s.wifi, 0);
+    phoneui_backend_quick_toggle(backend, 0, message, sizeof(message));
+    DMOD_TEST_EXPECT_TRUE(strcmp(message, "Wi-Fi: not available") == 0);
+    phoneui_backend_quick(backend, &q);
+    DMOD_TEST_EXPECT_EQ(q.on[0], 0);                            /* (nothing was switched) */
     phoneui_backend_free(backend);
 }
 

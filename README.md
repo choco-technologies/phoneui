@@ -6,7 +6,8 @@ The graphical interface of a phone based on dmod: a home screen with notificatio
 and messengers, conversations, quick settings and a store - for every kind of screen its own design, one logic behind all of them.
 
 The first screen is the 240 x 320 e-paper of the LILYGO **T-Deck Pro** (`epaper-240x320`). The functions behind the interface - telephony,
-messages, radio, settings, the store - are stubs for now: the interface is finished and designed, the functions are to be plugged in.
+messages, radio, settings, the store - are stubs for now: the interface is finished and designed, the functions are to be plugged in. The
+first one plugged in is the Wi-Fi: its tile switches the radio of the board (docs/backend.md).
 
 ![The screens of the T-Deck Pro](docs/epaper-240x320.png)
 

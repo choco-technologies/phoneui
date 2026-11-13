@@ -88,7 +88,7 @@ dmod_add_executable(${DMOD_MODULE_NAME} ${DMOD_MODULE_VERSION}
 
 # libdmview: the display claimed, the channel of the claim (dmdrvi: its types). libsystemd: the stop request of the service. dmosi: the waits.
 dmod_link_modules(${DMOD_MODULE_NAME}
-    dmdrvi@>=2.7
+    dmdrvi@>=2.15
     dmosi
     libdmview@>=0.17
     libsystemd

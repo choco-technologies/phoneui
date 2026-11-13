@@ -54,7 +54,7 @@ backend, draws into a buffer of the display's format and writes the pictures - w
 ```bash
 cmake -S . -B build -DDMOD_TOOLS_NAME=arch/x86_64 -DDMOD_BUILD_TOOLS=ON && cmake --build build
 dmod_loader build/dmf/dmvshot.dmf --args build/views/epaper-240x320/phoneui.dmv out \
-    shot:home click:200,307 shot:apps click:120,307 click:76,271 shot:inbox
+    shot:home click:200,307 wait:600 shot:apps click:120,307 click:76,271 shot:inbox
 ```
 
 Steps: `shot:<name>`, `click:<x>,<y>`, `press:<x>,<y>` (a touch that stays: a pressed button) and `release`, `wait:<ms>`, `expect:<event>`, `threshold:<n>`. The events the view emits are printed.

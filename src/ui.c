@@ -3,7 +3,7 @@
 #include <string.h>
 #include <errno.h>
 
-#define CACHE_ENTRIES       160u            /* Properties the view has (about 100) */
+#define CACHE_ENTRIES       256u            /* Properties the view has (about 180) */
 #define NAME_MAX_LEN        24u
 #define VALUE_MAX_LEN       60u
 
@@ -26,6 +26,17 @@ typedef struct
 
 #define TYPED_MAX       36U                         /* Bytes of the text of the search bar */
 
+/* The pages of the view (docs/contract.md, `page`) */
+#define PAGE_APPS       1
+#define PAGE_APP        6                           /* an application, in a rent */
+
+/* Where an application lives: the area of the page between the status bar and the buttons (the view's page 6 is empty there) */
+#define APP_RECT_X      0
+#define APP_RECT_Y      19
+#define APP_RECT_W      240
+#define APP_RECT_H      275
+#define KEY_ESCAPE      0x29u                       /* USB HID usage: always the phone's, not the application's */
+
 struct ui
 {
     cache_t             cache;
@@ -37,6 +48,11 @@ struct ui
     unsigned            toasts;
     char                typed[TYPED_MAX + 1];   /* What the keyboard wrote (UTF-8) */
     bool                typing;                 /* The search bar is where the keys go: it shows a cursor */
+    phoneui_app_t       apps[PHONEUI_APPS];     /* The applications of the list, as the view shows them */
+    unsigned            app_count;
+    int                 page;                   /* The page of the view */
+    uint32_t            rent;                   /* The rent of the application that runs, 0: none */
+    uint32_t            goto_count;             /* Makes every request for a page another value of the property */
 };
 
 static cache_entry_t* cache_find(cache_t* cache, const char* name)
@@ -196,6 +212,21 @@ static void show_store(ui_t ui)
     }
 }
 
+/* The applications that have an icon: a cell of the grid each - its name and its icon, which the view draws from the file */
+static void show_apps(ui_t ui)
+{
+    ui->app_count = (unsigned)phoneui_backend_apps(ui->backend, ui->apps);
+    for (unsigned i = 0; i < PHONEUI_APPS; i++)
+    {
+        if (i < ui->app_count)
+        {
+            set_indexed_text(&ui->cache, "a", i, "name", ui->apps[i].name);
+            set_indexed_text(&ui->cache, "a", i, "icon", ui->apps[i].icon);
+        }
+        set_indexed_int(&ui->cache, "a", i, "on", i < ui->app_count);       /* (last: the cell is shown with its name and icon) */
+    }
+}
+
 void ui_show_all(ui_t ui)
 {
     ui_show_status(ui);
@@ -204,6 +235,7 @@ void ui_show_all(ui_t ui)
     show_thread(ui);
     show_quick(ui);
     show_store(ui);
+    show_apps(ui);
 }
 
 /* A line at the bottom for the user (the view shows it for a moment): the text changes with every one, or the view would not see it */
@@ -294,6 +326,69 @@ static void type_key(ui_t ui, int code, char* message, size_t size)
     }
 }
 
+/* ---- An application in a rent ---- */
+
+/* The view goes to a page (the application is what changes the page when its application ends) */
+static void goto_page(ui_t ui, int page)
+{
+    set_int(&ui->cache, "goto", (int32_t)(((++ui->goto_count & 0xFFFFu) << 4) | (uint32_t)page));
+}
+
+/* The rent is taken back: the application's claim is gone, which is what it ends by */
+static void app_close(ui_t ui)
+{
+    if (ui->rent == 0)
+        return;
+    (void)libdmview_rent_set_focus(ui->rent, false);
+    (void)libdmview_rent_release(ui->rent);
+    ui->rent = 0;
+}
+
+/*
+ * The application of a cell is started in a rent of the screen: the area of page 6 of the view. It is given the name of the rent
+ * (`--display NAME`) and claims it; it is shown while the page is, has the keys (except Escape, which is the phone's) and ends when
+ * the rent is taken back - on any other page, or when the user leaves.
+ */
+static void app_launch(ui_t ui, int index, char* message, size_t size)
+{
+    if (index < 0 || (unsigned)index >= ui->app_count)
+    {
+        Dmod_SnPrintf(message, size, "No such application");
+        goto_page(ui, PAGE_APPS);
+        return;
+    }
+    const phoneui_app_t* app = &ui->apps[index];
+    app_close(ui);
+
+    const libdmview_rect_t area = { APP_RECT_X, APP_RECT_Y, APP_RECT_W, APP_RECT_H };
+    uint32_t rent = 0;
+    char name[48];
+    int ret = libdmview_rent_create(ui->cache.claim, &area, &rent);
+    if (ret == 0)
+        ret = libdmview_rent_name(rent, name, sizeof(name));
+    if (ret != 0)
+    {
+        Dmod_SnPrintf(message, size, "%s: no room on the screen (%d)", app->name, ret);
+        goto_page(ui, PAGE_APPS);
+        return;
+    }
+    char* argv[] = { (char*)app->name, "--display", name };
+    int pid = Dmod_SpawnModule(app->name, 3, argv, NULL);
+    if (pid < 0)
+    {
+        (void)libdmview_rent_release(rent);
+        Dmod_SnPrintf(message, size, "%s: cannot start (%d)", app->name, pid);
+        goto_page(ui, PAGE_APPS);
+        return;
+    }
+    (void)libdmview_rent_bind(rent, (uint32_t)pid);
+    (void)libdmview_rent_set_escape(rent, KEY_ESCAPE);
+    (void)libdmview_rent_set_focus(rent, true);
+    (void)libdmview_rent_set_visible(rent, ui->page == PAGE_APP);
+    ui->rent = rent;
+    DMOD_LOG_INFO("phoneui: %s (pid %d) runs in the rent %s\n", app->name, pid, name);
+}
+
 void ui_handle(ui_t ui, const libdmview_event_t* ev)
 {
     char message[VALUE_MAX_LEN] = "";
@@ -302,13 +397,38 @@ void ui_handle(ui_t ui, const libdmview_event_t* ev)
 
     if (strcmp(name, "page") == 0)
     {
+        ui->page = value;
         ui->typing = false;                                         /* the field is deselected with the page, and empty */
         ui->typed[0] = '\0';
         show_typed(ui);
+        if (ui->rent != 0)
+        {
+            if (value == PAGE_APP)
+                (void)libdmview_rent_set_visible(ui->rent, true);   /* its application's page: shown */
+            else
+                app_close(ui);                                      /* any other: the application ends */
+        }
         ui_show_all(ui);                                           /* a page opens: what it shows is up to date */
     }
     else if (strcmp(name, "launch") == 0)
-        phoneui_backend_launch(ui->backend, value, message, sizeof(message));
+        app_launch(ui, value, message, sizeof(message));
+    else if (strcmp(name, "rent.closed") == 0)
+    {
+        /* Its application ended by itself: the rent is of no use, the user is back at the applications */
+        if (ui->rent != 0 && (uint32_t)value == ui->rent)
+        {
+            app_close(ui);
+            if (ui->page == PAGE_APP)
+                goto_page(ui, PAGE_APPS);
+        }
+    }
+    else if (strcmp(name, "rent.open") == 0)
+        ;                                                           /* (the view of the application is shown by the display's service) */
+    else if (strcmp(name, "dock") == 0)
+    {
+        static const char* const DOCK[] = { "phone", "chat", "mesh", "maps" };
+        phoneui_backend_request(ui->backend, (value >= 0 && value < 4) ? DOCK[value] : "dock", message, sizeof(message));
+    }
     else if (strcmp(name, "inbox.tab") == 0)
     {
         ui->inbox_tab = value;
@@ -357,6 +477,11 @@ void ui_handle(ui_t ui, const libdmview_event_t* ev)
     {
         if (ui->typing)
             type_key(ui, value, message, sizeof(message));
+        else if (value == (int)KEY_ESCAPE && ui->page == PAGE_APP)
+        {
+            app_close(ui);                                          /* Escape leaves the application */
+            goto_page(ui, PAGE_APPS);
+        }
     }
     else
         phoneui_backend_request(ui->backend, name, message, sizeof(message));
@@ -382,5 +507,7 @@ uint32_t ui_failures(ui_t ui)
 
 void ui_free(ui_t ui)
 {
+    if (ui != NULL)
+        app_close(ui);
     Dmod_Free(ui);
 }

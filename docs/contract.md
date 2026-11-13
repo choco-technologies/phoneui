@@ -30,6 +30,10 @@ Texts are at most 48 bytes (a property holds 64).
 | `chat.title`, `chat.sub`, `chat.ini`, `chat.stamp`, `chat.state` | text | the header of the open conversation, the time line and the delivery of the last own message |
 | `c<0..3>.side` | 0 none, 1 the other party, 2 own | a bubble of the conversation |
 | `c<i>.l1`, `c<i>.l2` | text | its two lines (the application wraps) |
+| `a<0..23>.on` | 0/1 | a cell of the grid of applications is shown (set last: the cell appears with its name and icon) |
+| `a<i>.name` | text | its label: the module's name |
+| `a<i>.icon` | text | its icon: the path of the icon without `.dmvi` (`/eviews/icons/hello`). The view draws that file, as it is (48 x 48): an image the application chooses (dmvs_html `data-dmod-src`) |
+| `goto` | int | the application moves the view to a page: the value modulo 16 is the page, the rest counts (so that the same page can be asked for again) |
 | `q0` .. `q8` | 0/1 | the quick settings tiles, in the order Wi-Fi, 4G, Bluetooth, LoRa, GPS, airplane, backlight, vibrate, DND |
 | `q.level` | 0..10 | the backlight's segments |
 | `q.battery` | text | the line under them |
@@ -41,10 +45,10 @@ Texts are at most 48 bytes (a property holds 64).
 
 | Event | Value | When |
 |-------|-------|------|
-| `page` | 0 home, 1 apps, 2 inbox, 3 chat, 4 quick settings, 5 store | a page opened (the application refreshes what it shows) |
-| `launch` | the application's number (0..23, the order of the list) | an application's tile or a dock tile was touched (the pages that exist - the inbox, the store - open by themselves) |
+| `page` | 0 home, 1 apps, 2 inbox, 3 chat, 4 quick settings, 5 store, 6 an application | a page opened (the application refreshes what it shows; leaving page 6 ends the application) |
+| `launch` | the cell of the grid (0..23, the order of `a<i>`) | an application's icon was touched: the application starts it in a rent of the screen (page 6, which the view opens itself) |
+| `dock` | the tile 0..3 | a tile of the dock that is not a page of the view (phone, mesh, maps: there is nothing behind them yet) |
 | `notification` | the row | a notification of the home screen |
-| `apps.filter` | 0 all, 1 comms, 2 tools, 3 media, 4 more | a filter chip of the list |
 | `char` | Unicode | a key that gives a character went down (from libdmview_key): the application writes it in the search bar |
 | `key` | USB HID usage | a key that gives none went down: Backspace erases, Escape clears, Enter takes the text (a toast) |
 | `mods` | bits | the modifiers changed (shift 1, ctrl 2, alt 4, sym 8, caps 16) - not used yet |

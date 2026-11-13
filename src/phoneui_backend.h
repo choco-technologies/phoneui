@@ -10,7 +10,7 @@
  * it what the user did; the view knows nothing of it (it has properties and events - docs/contract.md). The implementation of this
  * file is the stub (backend_stub.c): data made up, nothing really done. A real function replaces its part of the stub - the
  * telephony, the messages, the radio, the settings, the store - without touching the application or the view. Real so far: the Wi-Fi
- * (the tile of the quick settings and the icon of the status bar).
+ * (the tile of the quick settings and the icon of the status bar) and the list of the applications.
  */
 
 #define PHONEUI_TEXT            48U     /**< Longest text of a field of the view (it has 64 bytes with the end) */
@@ -20,6 +20,7 @@
 #define PHONEUI_STORE_ROWS      3U
 #define PHONEUI_QUICK           9U      /**< Tiles of the quick settings */
 #define PHONEUI_APPS            24U     /**< Applications of the list (two pages) */
+#define PHONEUI_ICON_PATH       96U     /**< Longest path of an icon, with the end */
 #define PHONEUI_LEVELS          10U     /**< Steps of the backlight */
 
 /** What a row of the lists is about (the view draws the icon or the tag by it); 0: the row is empty */
@@ -31,6 +32,13 @@ typedef enum
     phoneui_kind_call,
     phoneui_kind_chat,
 } phoneui_kind_t;
+
+/** An installed application: a module that has an icon */
+typedef struct
+{
+    char    name[PHONEUI_TEXT];         /**< The module - what is started, and what the cell of the list says */
+    char    icon[PHONEUI_ICON_PATH];    /**< Its icon without ".dmvi" - the view shows the image that file is (docs/contract.md, a<i>.icon) */
+} phoneui_app_t;
 
 typedef struct
 {
@@ -109,8 +117,12 @@ void phoneui_backend_quick_level(phoneui_backend_t backend, int level);
 void phoneui_backend_store(phoneui_backend_t backend, int tab, phoneui_store_t* store);
 /** The button of a row of the store: what it did, as a line for the user (the result of a stub says it is one) */
 void phoneui_backend_store_action(phoneui_backend_t backend, int tab, int row, char* message, size_t size);
-/** An application of the list; the line for the user ("not available yet" until the application exists) */
-void phoneui_backend_launch(phoneui_backend_t backend, int app, char* message, size_t size);
+/**
+ * The applications installed: the modules that have an icon (the .dmvi files of the icons directory, `/eviews/icons` - $PHONEUI_ICONS
+ * says another - which `dmf-get --icons-dir` fills), by name. An application without an icon is not listed.
+ * @return how many were stored (at most PHONEUI_APPS)
+ */
+size_t phoneui_backend_apps(phoneui_backend_t backend, phoneui_app_t apps[PHONEUI_APPS]);
 /** Anything else the interface asks for (search, compose, call, send ...): the line for the user */
 void phoneui_backend_request(phoneui_backend_t backend, const char* what, char* message, size_t size);
 

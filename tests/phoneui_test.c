@@ -136,13 +136,40 @@ DMOD_TEST_STEP(store_actions_change_the_button)
     phoneui_backend_free(backend);
 }
 
+/* The applications are the modules that have an icon: the .dmvi files of the icons directory, by name (tests/icons) */
+#ifndef PHONEUI_TEST_ICONS
+#define PHONEUI_TEST_ICONS "icons"
+#endif
+
+DMOD_TEST_STEP(applications_are_the_modules_with_an_icon)
+{
+    phoneui_backend_t backend = fresh();
+    phoneui_app_t apps[PHONEUI_APPS];
+    Dmod_SetEnv("PHONEUI_ICONS", PHONEUI_TEST_ICONS, 1);
+    /* alpha, beta, gamma have an icon; readme.txt is no icon, small/ is a directory of icon variants, nothing.dmvi... is not a name */
+    size_t n = phoneui_backend_apps(backend, apps);
+    DMOD_TEST_EXPECT_EQ((int)n, 3);
+    DMOD_TEST_EXPECT_TRUE(strcmp(apps[0].name, "alpha") == 0);
+    DMOD_TEST_EXPECT_TRUE(strcmp(apps[1].name, "beta") == 0);
+    DMOD_TEST_EXPECT_TRUE(strcmp(apps[2].name, "gamma") == 0);
+    DMOD_TEST_EXPECT_TRUE(strcmp(apps[1].icon, PHONEUI_TEST_ICONS "/beta") == 0);      /* the view appends the end of the file */
+
+    /* A trailing slash of the directory does not double */
+    Dmod_SetEnv("PHONEUI_ICONS", PHONEUI_TEST_ICONS "/", 1);
+    DMOD_TEST_EXPECT_EQ((int)phoneui_backend_apps(backend, apps), 3);
+    DMOD_TEST_EXPECT_TRUE(strcmp(apps[0].icon, PHONEUI_TEST_ICONS "/alpha") == 0);
+
+    /* No icons directory: no applications (nothing is made up) */
+    Dmod_SetEnv("PHONEUI_ICONS", PHONEUI_TEST_ICONS "/nowhere", 1);
+    DMOD_TEST_EXPECT_EQ((int)phoneui_backend_apps(backend, apps), 0);
+    Dmod_SetEnv("PHONEUI_ICONS", "", 1);
+    phoneui_backend_free(backend);
+}
+
 DMOD_TEST_STEP(requests_are_answered)
 {
     phoneui_backend_t backend = fresh();
     char message[64] = "";
-    phoneui_backend_launch(backend, 4, message, sizeof(message));
-    DMOD_TEST_EXPECT_EQ(strncmp(message, "Notes", 5), 0);
-    message[0] = '\0';
     phoneui_backend_request(backend, "search", message, sizeof(message));
     DMOD_TEST_EXPECT_TRUE(message[0] != '\0');
     phoneui_backend_free(backend);

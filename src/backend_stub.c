@@ -6,8 +6,8 @@
 
 /*
  * The stub backend: made-up data in the shape of the real one. Nothing is done: the quick settings tiles and the backlight keep what
- * they were set to, the store "installs" nothing, the applications are not there. Except the Wi-Fi, which is real: its tile and the icon of
- * the status bar are the node of the Wi-Fi driver (wifi_* below). See phoneui_backend.h.
+ * they were set to, the store "installs" nothing. Except the Wi-Fi, which is real - its tile and the icon of the status bar are the node of
+ * the Wi-Fi driver (wifi_* below) - and the list of the applications (phoneui_backend_apps). See phoneui_backend.h.
  */
 
 /* ---- The Wi-Fi: the node of the driver (the interface wlan0: /dev/wlan0, where the `wifi` tool looks for it) ---- */
@@ -65,11 +65,6 @@ static const contact_t CONTACTS[] = {
     { phoneui_kind_chat, "P", "Piotr",    "yesterday", 0, "Chat · Wi-Fi",   "trasa.gpx (24 kB)" },
 };
 #define CONTACTS_COUNT  (sizeof(CONTACTS) / sizeof(CONTACTS[0]))
-
-static const char APP_NAMES[PHONEUI_APPS][10] = {
-    "Phone", "Chat", "Mesh", "Maps", "Notes", "Reader", "Settings", "Files", "Terminal", "Music", "Clock", "Store",
-    "Mail", "Calendar", "Calc", "Recorder", "Weather", "Radio", "Torch", "Alarm", "Contacts", "Gallery", "Games", "Help"
-};
 
 static void copy(char* to, size_t size, const char* from)
 {
@@ -258,12 +253,55 @@ void phoneui_backend_store_action(phoneui_backend_t backend, int tab, int row, c
     *installed = 1;
 }
 
-void phoneui_backend_launch(phoneui_backend_t backend, int app, char* message, size_t size)
+/* ---- The applications: the icons ---- */
+
+#define ICONS_DIR       "/eviews/icons"             /* dmod-boot: the icons of the flash modules (dmf-get --icons-dir) */
+#define ICON_SUFFIX     ".dmvi"
+
+size_t phoneui_backend_apps(phoneui_backend_t backend, phoneui_app_t apps[PHONEUI_APPS])
 {
     (void)backend;
-    if (app < 0 || app >= (int)PHONEUI_APPS)
-        return;
-    Dmod_SnPrintf(message, size, "%s: not available yet", APP_NAMES[app]);
+    const char* dir = Dmod_GetEnv("PHONEUI_ICONS");
+    if (dir == NULL || dir[0] == '\0')
+        dir = ICONS_DIR;
+    size_t dir_length = strlen(dir);
+    while (dir_length > 1 && dir[dir_length - 1U] == '/')
+        dir_length--;
+
+    void* handle = Dmod_OpenDir(dir);
+    if (handle == NULL)
+        return 0;
+    const size_t suffix = sizeof(ICON_SUFFIX) - 1U;
+    size_t count = 0;
+    const char* entry;
+    while ((entry = Dmod_ReadDir(handle)) != NULL)
+    {
+        size_t length = strlen(entry);
+        /* An icon is <module>.dmvi: a directory (the variants are in subdirectories) and anything else is not */
+        if (length <= suffix || strcmp(entry + length - suffix, ICON_SUFFIX) != 0 || length - suffix >= PHONEUI_TEXT ||
+            dir_length + 1U + length - suffix >= PHONEUI_ICON_PATH)
+            continue;
+        char name[PHONEUI_TEXT];
+        memcpy(name, entry, length - suffix);
+        name[length - suffix] = '\0';
+
+        /* By name: inserted where it belongs */
+        size_t at = 0;
+        while (at < count && strcmp(apps[at].name, name) < 0)
+            at++;
+        if (count == PHONEUI_APPS && at == count)
+            continue;                                       /* (past the last of the 24 that fit) */
+        size_t last = (count == PHONEUI_APPS) ? count - 1U : count;
+        for (size_t i = last; i > at; i--)
+            apps[i] = apps[i - 1U];
+        memset(&apps[at], 0, sizeof(apps[at]));
+        copy(apps[at].name, sizeof(apps[at].name), name);
+        Dmod_SnPrintf(apps[at].icon, sizeof(apps[at].icon), "%.*s/%s", (int)dir_length, dir, name);
+        if (count < PHONEUI_APPS)
+            count++;
+    }
+    Dmod_CloseDir(handle);
+    return count;
 }
 
 void phoneui_backend_request(phoneui_backend_t backend, const char* what, char* message, size_t size)

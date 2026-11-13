@@ -268,6 +268,13 @@ size_t phoneui_backend_apps(phoneui_backend_t backend, phoneui_app_t apps[PHONEU
     while (dir_length > 1 && dir[dir_length - 1U] == '/')
         dir_length--;
 
+    /* The directory without the slashes at its end (Dmod's printf has no "%.*s") */
+    char base[PHONEUI_ICON_PATH];
+    if (dir_length >= sizeof(base))
+        return 0;
+    memcpy(base, dir, dir_length);
+    base[dir_length] = '\0';
+
     void* handle = Dmod_OpenDir(dir);
     if (handle == NULL)
         return 0;
@@ -296,7 +303,7 @@ size_t phoneui_backend_apps(phoneui_backend_t backend, phoneui_app_t apps[PHONEU
             apps[i] = apps[i - 1U];
         memset(&apps[at], 0, sizeof(apps[at]));
         copy(apps[at].name, sizeof(apps[at].name), name);
-        Dmod_SnPrintf(apps[at].icon, sizeof(apps[at].icon), "%.*s/%s", (int)dir_length, dir, name);
+        Dmod_SnPrintf(apps[at].icon, sizeof(apps[at].icon), "%s/%s", base, name);
         if (count < PHONEUI_APPS)
             count++;
     }

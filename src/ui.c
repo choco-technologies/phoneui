@@ -53,6 +53,10 @@ struct ui
     int                 page;                   /* The page of the view */
     uint32_t            rent;                   /* The rent of the application that runs, 0: none */
     uint32_t            goto_count;             /* Makes every request for a page another value of the property */
+    /* The arguments of the application: Dmod_Spawn() keeps the pointers for as long as the process runs, so they are not on a stack */
+    char                app_name[PHONEUI_TEXT];
+    char                rent_name[48];
+    char*               app_argv[3];
 };
 
 static cache_entry_t* cache_find(cache_t* cache, const char* name)
@@ -362,18 +366,21 @@ static void app_launch(ui_t ui, int index, char* message, size_t size)
 
     const libdmview_rect_t area = { APP_RECT_X, APP_RECT_Y, APP_RECT_W, APP_RECT_H };
     uint32_t rent = 0;
-    char name[48];
+    char* name = ui->rent_name;
     int ret = libdmview_rent_create(ui->cache.claim, &area, &rent);
     if (ret == 0)
-        ret = libdmview_rent_name(rent, name, sizeof(name));
+        ret = libdmview_rent_name(rent, name, sizeof(ui->rent_name));
     if (ret != 0)
     {
         Dmod_SnPrintf(message, size, "%s: no room on the screen (%d)", app->name, ret);
         goto_page(ui, PAGE_APPS);
         return;
     }
-    char* argv[] = { (char*)app->name, "--display", name };
-    int pid = Dmod_SpawnModule(app->name, 3, argv, NULL);
+    Dmod_SnPrintf(ui->app_name, sizeof(ui->app_name), "%s", app->name);
+    ui->app_argv[0] = ui->app_name;
+    ui->app_argv[1] = "--display";
+    ui->app_argv[2] = ui->rent_name;
+    int pid = Dmod_SpawnModule(ui->app_name, 3, ui->app_argv, NULL);
     if (pid < 0)
     {
         (void)libdmview_rent_release(rent);
@@ -387,6 +394,24 @@ static void app_launch(ui_t ui, int index, char* message, size_t size)
     (void)libdmview_rent_set_visible(rent, ui->page == PAGE_APP);
     ui->rent = rent;
     DMOD_LOG_INFO("phoneui: %s (pid %d) runs in the rent %s\n", app->name, pid, name);
+}
+
+bool ui_launch(ui_t ui, const char* name)
+{
+    show_apps(ui);
+    for (unsigned i = 0; i < ui->app_count; i++)
+    {
+        if (strcmp(ui->apps[i].name, name) != 0)
+            continue;
+        char message[VALUE_MAX_LEN] = "";
+        app_launch(ui, (int)i, message, sizeof(message));
+        if (message[0] != '\0')
+            toast(ui, message);
+        else
+            goto_page(ui, PAGE_APP);                                /* (what the touch's page event does) */
+        return true;
+    }
+    return false;
 }
 
 void ui_handle(ui_t ui, const libdmview_event_t* ev)

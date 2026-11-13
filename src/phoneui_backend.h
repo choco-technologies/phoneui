@@ -9,7 +9,8 @@
  * What the phone does, as the interface shows it. phoneui (the application) asks a backend for the state the screens show and tells
  * it what the user did; the view knows nothing of it (it has properties and events - docs/contract.md). The implementation of this
  * file is the stub (backend_stub.c): data made up, nothing really done. A real function replaces its part of the stub - the
- * telephony, the messages, the radio, the settings, the store - without touching the application or the view.
+ * telephony, the messages, the radio, the settings, the store - without touching the application or the view. Real so far: the Wi-Fi
+ * (the tile of the quick settings and the icon of the status bar).
  */
 
 #define PHONEUI_TEXT            48U     /**< Longest text of a field of the view (it has 64 bytes with the end) */
@@ -39,7 +40,7 @@ typedef struct
     int32_t battery;                    /**< 0..100 */
     int32_t charging;
     int32_t signal;                     /**< 0..4 bars of the cellular network */
-    int32_t wifi, bt, gps, lora;        /**< The indicators of the status bar: 1 shown */
+    int32_t wifi, bt, gps, lora;        /**< The indicators of the status bar: 1 shown (wifi: connected to a network) */
 } phoneui_status_t;
 
 /** A row of the home screen's notifications, of the inbox */
@@ -73,7 +74,7 @@ typedef struct
 
 typedef struct
 {
-    int32_t on[PHONEUI_QUICK];          /**< 1: the tile is on */
+    int32_t on[PHONEUI_QUICK];          /**< 1: the tile is on (Wi-Fi: the radio is on, connected or not) */
     int32_t level;                      /**< The backlight, 0..PHONEUI_LEVELS */
     char    battery[PHONEUI_TEXT];      /**< "Battery 82%  ·  about 2 days left" */
 } phoneui_quick_t;
@@ -102,7 +103,8 @@ void phoneui_backend_inbox(phoneui_backend_t backend, int tab, phoneui_row_t row
 /** The conversation of a row of the inbox (index of the filtered list) */
 void phoneui_backend_thread(phoneui_backend_t backend, int tab, int row, phoneui_thread_t* thread);
 void phoneui_backend_quick(phoneui_backend_t backend, phoneui_quick_t* quick);
-void phoneui_backend_quick_toggle(phoneui_backend_t backend, int tile);
+/** A tile of the quick settings was tapped; a message (a line for the user) only when it could not be done ("" otherwise) */
+void phoneui_backend_quick_toggle(phoneui_backend_t backend, int tile, char* message, size_t size);
 void phoneui_backend_quick_level(phoneui_backend_t backend, int level);
 void phoneui_backend_store(phoneui_backend_t backend, int tab, phoneui_store_t* store);
 /** The button of a row of the store: what it did, as a line for the user (the result of a stub says it is one) */

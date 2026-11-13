@@ -322,7 +322,7 @@ void ui_handle(ui_t ui, const libdmview_event_t* ev)
     }
     else if (strcmp(name, "quick") == 0)
     {
-        phoneui_backend_quick_toggle(ui->backend, value);
+        phoneui_backend_quick_toggle(ui->backend, value, message, sizeof(message));
         show_quick(ui);
         ui_show_status(ui);
     }

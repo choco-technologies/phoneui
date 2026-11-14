@@ -75,7 +75,8 @@ dmod_add_executable(${DMOD_MODULE_NAME} ${DMOD_MODULE_VERSION}
 # ======================================================================
 set(DMOD_MODULE_NAME        phoneui)
 set(DMOD_AUTHOR_NAME        "Patryk Kubiak")
-set(DMOD_STACK_SIZE         4096)
+# (starting an application loads its module on this stack: 4096 overflowed on the ESP32-S3)
+set(DMOD_STACK_SIZE         6144)
 set(DMOD_PRIORITY           1)
 set(DMOD_DMR_PATH           ${CMAKE_CURRENT_SOURCE_DIR}/phoneui.dmr)
 set(DMOD_MAL_IMPLS          )
@@ -90,7 +91,7 @@ dmod_add_executable(${DMOD_MODULE_NAME} ${DMOD_MODULE_VERSION}
 dmod_link_modules(${DMOD_MODULE_NAME}
     dmdrvi@>=2.15
     dmosi
-    libdmview@>=0.17
+    libdmview@>=0.20
     libsystemd
 )
 

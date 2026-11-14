@@ -12,7 +12,7 @@ body { font-size: 12px; line-height: 1.2; }
 #phoneui-screen { position: relative; width: 240px; height: 320px; background: #fff; overflow: hidden; }
 .abs { position: absolute; }
 .hidden { opacity: 0; pointer-events: none; }
-#pager { position: absolute; left: 0; top: 62px; width: 240px; height: 190px; overflow-x: auto; overflow-y: hidden; }
+#pager { position: absolute; left: 0; top: 40px; width: 240px; height: 190px; overflow-x: auto; overflow-y: hidden; }
 #pgs { position: relative; width: 480px; height: 190px; }
 .appspage { position: absolute; top: 0; width: 240px; height: 190px; }
 #ap0 { left: 0; }
@@ -77,9 +77,9 @@ body { font-size: 12px; line-height: 1.2; }
 #search .typed { position: absolute; left: 30px; top: 2px; width: 182px; white-space: nowrap; overflow: hidden; }
 
 /* apps */
-.app { position: absolute; width: 60px; height: 60px; }
-.app .tile { position: absolute; left: 11px; top: 0; }
-.app .lbl { position: absolute; left: 0; top: 43px; width: 60px; font-size: 10px; text-align: center; white-space: nowrap; }
+.app { position: absolute; width: 60px; height: 64px; }
+.app .aimg { position: absolute; left: 6px; top: 0; width: 48px; height: 48px; object-fit: none; }   /* (the icon file is drawn as it is: 48 x 48) */
+.app .lbl { position: absolute; left: 0; top: 50px; width: 60px; font-size: 10px; text-align: center; white-space: nowrap; }
 .dot { position: absolute; width: 120px; height: 23px; }
 .pip { position: absolute; width: 8px; height: 8px; border: 1px solid #000; border-radius: 4px; overflow: hidden; }
 

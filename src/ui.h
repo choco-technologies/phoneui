@@ -25,4 +25,7 @@ void ui_show_status(ui_t ui);
 /** What the view asked for */
 void ui_handle(ui_t ui, const libdmview_event_t* event);
 
+/** Start an application of the list (a module with an icon) as a touch on its cell would. false: there is no such application */
+bool ui_launch(ui_t ui, const char* name);
+
 #endif /* PHONEUI_UI_H */

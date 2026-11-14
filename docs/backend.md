@@ -11,7 +11,22 @@ or the view:
 | `..._notifications`, `..._inbox`, `..._thread` | made-up conversations | the message store: SMS (modem), the mesh (LoRa), messengers |
 | `..._quick*` | the tiles keep what they were set to; **the Wi-Fi tile is real** (below) | the other radios, the backlight, the haptic motor, the settings |
 | `..._store*` | made-up applications, "installs" nothing | the registry and `dmf-get` |
-| `..._launch`, `..._request` | "not available yet" | the applications, the keyboard (search, send) |
+| `..._apps` | **real** (below) | |
+| `..._request` | "not available yet" | what the dock and the buttons ask for: calls, messages, search, send |
+
+## The applications (real)
+
+The grid of the applications lists the modules that have an **icon**: the `.dmvi` files of the icons directory - `/eviews/icons`, which dmod-boot
+fills with `dmf-get --icons-dir` (`$PHONEUI_ICONS` says another) - by name; a module without one is not listed (the first 24 are). The icon of a
+module is made from its `icon` resource (docs of dmod: "Icons"), for the screen the image was installed for. The view draws the file by the
+property `a<i>.icon` (the path without `.dmvi`), as it is - the icon of the e-paper's screen is 48 x 48, the size of the cell.
+
+A touch on a cell **starts the application in a rent** of the screen (dmview's `docs/rent.md`): phoneui rents the area between the status bar and
+the buttons (page 6 of the view is empty there), starts the module with `--display NAME` (the name of the rent) and binds the rent to its process.
+The application claims that name like a display and draws into it; it has the keys while the page is shown, except Escape, which is the phone's
+(it leaves the application). It ends when the rent is taken back - on any other page, on Escape, or when the user leaves - by its claim
+being gone (`-ENOENT`): an application written for this ends when `libdmview_wait_event()` says so. When it ends by itself, the user is back at
+the grid. A module that does not start says so in a line at the bottom.
 
 ## The Wi-Fi (real)
 

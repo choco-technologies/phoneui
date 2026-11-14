@@ -16,6 +16,11 @@
  * was touched. What the phone does comes from a backend (phoneui_backend.h): until the functions are there, the stub.
  *
  * It is started as a service (configs/phoneui.ini): the display is waited for.
+ *
+ *   phoneui [<view>] [<display>] [--launch <application>]
+ *
+ * --launch starts an application of the launcher (a module with an icon) at once, as a touch on its icon would - a phone that is a kiosk of
+ * one application, a test of the rent from a shell.
  */
 
 #define DEFAULT_VIEW        "/eviews/phoneui_view/phoneui.dmv"      /* dmod-boot: the views of the flash modules */
@@ -38,8 +43,17 @@ static bool wait_for(const char* path, dmosi_semaphore_t wakeup, uint32_t timeou
 
 int main(int argc, char* argv[])
 {
-    const char* view = (argc > 1 && argv[1][0] != '\0') ? argv[1] : DEFAULT_VIEW;
-    const char* display = (argc > 2 && argv[2][0] != '\0') ? argv[2] : NULL;
+    const char* positional[2] = { NULL, NULL };
+    const char* launch = NULL;
+    for (int i = 1, n = 0; i < argc; i++)
+    {
+        if (strcmp(argv[i], "--launch") == 0 && i + 1 < argc)
+            launch = argv[++i];
+        else if (n < 2)
+            positional[n++] = argv[i];
+    }
+    const char* view = (positional[0] != NULL && positional[0][0] != '\0') ? positional[0] : DEFAULT_VIEW;
+    const char* display = (positional[1] != NULL && positional[1][0] != '\0') ? positional[1] : NULL;
 
     dmosi_semaphore_t wakeup = dmosi_semaphore_create(0, 1);
     if (wakeup == NULL)
@@ -79,6 +93,8 @@ int main(int argc, char* argv[])
     }
     DMOD_LOG_INFO("phoneui: showing %s\n", view);
     ui_show_all(ui);
+    if (launch != NULL && !ui_launch(ui, launch))
+        DMOD_LOG_ERROR("phoneui: no application %s (a module with an icon)\n", launch);
     while (!libsystemd_stop_requested())
     {
         libdmview_event_t ev;

@@ -9,6 +9,7 @@ dmod_add_test(${DMOD_MODULE_NAME} ${DMOD_MODULE_VERSION}
     ../src/backend_stub.c
 )
 target_include_directories(${DMOD_MODULE_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../src)
+target_compile_definitions(${DMOD_MODULE_NAME} PRIVATE PHONEUI_TEST_ICONS="${CMAKE_CURRENT_SOURCE_DIR}/icons")
 dmod_link_modules(${DMOD_MODULE_NAME}
     dmdrvi@>=2.15
 )

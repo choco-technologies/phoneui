@@ -10,6 +10,7 @@ dmod_add_executable(${DMOD_MODULE_NAME} ${DMOD_MODULE_VERSION}
     main.c
     ../../src/ui.c
     ../../src/backend_stub.c
+    ../../src/battery_line.c
 )
 target_include_directories(${DMOD_MODULE_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../src)
 

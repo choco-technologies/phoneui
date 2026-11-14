@@ -85,6 +85,7 @@ dmod_add_executable(${DMOD_MODULE_NAME} ${DMOD_MODULE_VERSION}
     src/phoneui.c
     src/ui.c
     src/backend_stub.c
+    src/battery_line.c
 )
 
 # libdmview: the display claimed, the channel of the claim (dmdrvi: its types). libsystemd: the stop request of the service. dmosi: the waits.

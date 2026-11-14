@@ -66,7 +66,7 @@ cmake -S . -B build -DDMOD_TOOLS_NAME=arch/xtensa/esp32s3      # an architecture
 cmake --build build
 ```
 
-CMake configures by converting the pages (`todmvs` and its converters are downloaded with `dmf-get`; `-DPHONEUI_TOOLS_DIR=<dir>` uses
+dmod converts the pages (`screens/<screen>/index.html`, options in `index.html.ini`) when CMake configures (`todmvs` and its converters are downloaded with `dmf-get`; `-DDMOD_VIEWS_TOOLS_DIR=<dir>` uses
 the ones in a directory). The tests (`ctest`) run the stub backend.
 
 ## License

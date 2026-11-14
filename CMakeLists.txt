@@ -38,21 +38,12 @@ dmod_setup_external_module()
 # ======================================================================
 #               The views: screens/<screen>/index.html
 # ======================================================================
-# One page for each kind of screen (docs/screens.md). The page is converted by todmvs to a .dmvs with the fonts and images it draws (see
-# cmake/phoneui_page.cmake); dmod turns them into the views (.dmv, .dmvf, .dmvi) at build time. Every screen is a bundle of the
-# package phoneui_view (its .dmr declares it with [screen=<id>]); dmf-get picks one with --screen <id>.
-include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/phoneui_page.cmake)
+# One page for each kind of screen (docs/screens.md): screens/<screen>/index.html, with index.html.ini for the options of its conversion.
+# dmod's DMOD_ASSETS_PATHS does all of it at build time: todmvs lays the page out and writes the view with the fonts and images it draws,
+# and they become the views (.dmv, .dmvf, .dmvi) - see "Pages" in dmod's scripts/CMakeLists.txt. The size the page is laid out for is
+# the end of the screen's id. Every screen is a bundle of the package phoneui_view (its .dmr declares it with [screen=<id>]); dmf-get picks
+# one with --screen <id>.
 set(PHONEUI_SCREENS epaper-240x320)                 # the ids of the screens (the names of the directories under screens/)
-set(PHONEUI_SCREEN_SIZE_epaper-240x320 240x320)     # what the page is laid out for
-foreach(SCREEN IN LISTS PHONEUI_SCREENS)
-    phoneui_convert_page(
-        ${CMAKE_CURRENT_SOURCE_DIR}/screens/${SCREEN}/index.html
-        ${PHONEUI_SCREEN_SIZE_${SCREEN}}
-        phoneui-screen
-        phoneui
-        ${CMAKE_BINARY_DIR}/view-src/${SCREEN}
-    )
-endforeach()
 
 # ======================================================================
 #               phoneui_view - the views (data)
@@ -62,7 +53,7 @@ set(DMOD_AUTHOR_NAME        "Patryk Kubiak")
 set(DMOD_STACK_SIZE         1024)
 set(DMOD_PRIORITY           0)
 set(DMOD_DMR_PATH           ${CMAKE_CURRENT_SOURCE_DIR}/phoneui_view.dmr)
-set(DMOD_ASSETS_PATHS       ${CMAKE_BINARY_DIR}/view-src)
+set(DMOD_ASSETS_PATHS       ${CMAKE_CURRENT_SOURCE_DIR}/screens)
 set(DMOD_ASSETS_SCREENS     ${PHONEUI_SCREENS})
 set(DMOD_MAL_IMPLS          )
 

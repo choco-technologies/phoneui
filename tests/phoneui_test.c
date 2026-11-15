@@ -1,6 +1,7 @@
 #define DMOD_ENABLE_REGISTRATION ON
 #include "dmod_test.h"
 #include "phoneui_backend.h"
+#include "battery_line.h"
 #include <string.h>
 
 /* The stub backend: the data has the shape the view needs (texts fit, filters filter, state is kept) */
@@ -175,3 +176,73 @@ DMOD_TEST_STEP(requests_are_answered)
     phoneui_backend_free(backend);
 }
 
+
+/* ---- The battery: the node of a gauge is read through the interface of dmdrvi; the line under the tiles says it in words ---- */
+
+static void line_of(uint8_t state, uint8_t percent, uint16_t to_empty, uint16_t to_full, uint32_t valid, char* out, size_t size)
+{
+    dmdrvi_battery_status_t b;
+    memset(&b, 0, sizeof(b));
+    b.valid = valid;
+    b.state = state;
+    b.percent = percent;
+    b.minutes_to_empty = to_empty;
+    b.minutes_to_full = to_full;
+    phoneui_battery_line(&b, out, size);
+}
+
+#define ALL (DMDRVI_BATTERY_VALID_STATE | DMDRVI_BATTERY_VALID_PERCENT | DMDRVI_BATTERY_VALID_TIME)
+
+DMOD_TEST_STEP(battery_line_discharging)
+{
+    char line[64];
+    line_of(DMDRVI_BATTERY_STATE_DISCHARGING, 82, 250, 0, ALL, line, sizeof(line));
+    DMOD_TEST_EXPECT_TRUE(strcmp(line, "Battery 82%  \xC2\xB7  4 h 10 min left") == 0);
+    line_of(DMDRVI_BATTERY_STATE_DISCHARGING, 3, 35, 0, ALL, line, sizeof(line));
+    DMOD_TEST_EXPECT_TRUE(strcmp(line, "Battery 3%  \xC2\xB7  35 min left") == 0);
+    line_of(DMDRVI_BATTERY_STATE_DISCHARGING, 99, 3 * 24 * 60, 0, ALL, line, sizeof(line));
+    DMOD_TEST_EXPECT_TRUE(strcmp(line, "Battery 99%  \xC2\xB7  about 3 days left") == 0);
+    /* the chip does not know the time (or it is not valid): no time is made up */
+    line_of(DMDRVI_BATTERY_STATE_DISCHARGING, 82, 0, 0, ALL, line, sizeof(line));
+    DMOD_TEST_EXPECT_TRUE(strcmp(line, "Battery 82%") == 0);
+    line_of(DMDRVI_BATTERY_STATE_DISCHARGING, 82, 250, 0, ALL & ~DMDRVI_BATTERY_VALID_TIME, line, sizeof(line));
+    DMOD_TEST_EXPECT_TRUE(strcmp(line, "Battery 82%") == 0);
+}
+
+DMOD_TEST_STEP(battery_line_charging_full_idle)
+{
+    char line[64];
+    line_of(DMDRVI_BATTERY_STATE_CHARGING, 40, 0, 80, ALL, line, sizeof(line));
+    DMOD_TEST_EXPECT_TRUE(strcmp(line, "Battery 40%  \xC2\xB7  charging, full in 1 h 20 min") == 0);
+    line_of(DMDRVI_BATTERY_STATE_CHARGING, 40, 0, 0, ALL, line, sizeof(line));
+    DMOD_TEST_EXPECT_TRUE(strcmp(line, "Battery 40%  \xC2\xB7  charging") == 0);
+    line_of(DMDRVI_BATTERY_STATE_FULL, 100, 0, 0, ALL, line, sizeof(line));
+    DMOD_TEST_EXPECT_TRUE(strcmp(line, "Battery 100%  \xC2\xB7  full") == 0);
+    line_of(DMDRVI_BATTERY_STATE_IDLE, 60, 0, 0, ALL, line, sizeof(line));
+    DMOD_TEST_EXPECT_TRUE(strcmp(line, "Battery 60%  \xC2\xB7  not charging") == 0);
+}
+
+DMOD_TEST_STEP(battery_line_without_a_battery_or_a_number)
+{
+    char line[64];
+    line_of(DMDRVI_BATTERY_STATE_NOT_PRESENT, 0, 0, 0, DMDRVI_BATTERY_VALID_STATE, line, sizeof(line));
+    DMOD_TEST_EXPECT_TRUE(strcmp(line, "No battery") == 0);
+    line_of(DMDRVI_BATTERY_STATE_UNKNOWN, 0, 0, 0, 0, line, sizeof(line));            /* nothing is valid: nothing is shown but the word */
+    DMOD_TEST_EXPECT_TRUE(strcmp(line, "Battery") == 0);
+    line_of(DMDRVI_BATTERY_STATE_UNKNOWN, 55, 0, 0, DMDRVI_BATTERY_VALID_PERCENT, line, sizeof(line));
+    DMOD_TEST_EXPECT_TRUE(strcmp(line, "Battery 55%") == 0);
+}
+
+/* No node of a gauge (the host, a board without one): the stub's made-up battery stays */
+DMOD_TEST_STEP(battery_without_a_node_is_the_stub)
+{
+    phoneui_backend_t backend = fresh();
+    phoneui_status_t s;
+    phoneui_quick_t q;
+    phoneui_backend_status(backend, &s);
+    DMOD_TEST_EXPECT_EQ(s.battery, 82);
+    DMOD_TEST_EXPECT_EQ(s.charging, 0);
+    phoneui_backend_quick(backend, &q);
+    DMOD_TEST_EXPECT_TRUE(strncmp(q.battery, "Battery 82%", 11) == 0);
+    phoneui_backend_free(backend);
+}

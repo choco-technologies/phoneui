@@ -1,13 +1,15 @@
 #include "dmod.h"
 #include "dmdrvi_ioctl.h"
 #include "phoneui_backend.h"
+#include "battery_line.h"
 #include <string.h>
 #include <errno.h>
 
 /*
  * The stub backend: made-up data in the shape of the real one. Nothing is done: the quick settings tiles and the backlight keep what
  * they were set to, the store "installs" nothing. Except the Wi-Fi, which is real - its tile and the icon of the status bar are the node of
- * the Wi-Fi driver (wifi_* below) - and the list of the applications (phoneui_backend_apps). See phoneui_backend.h.
+ * the Wi-Fi driver (wifi_* below) - the battery, when the board has a node of a battery gauge (battery_* below) - and the list of the
+ * applications (phoneui_backend_apps). See phoneui_backend.h.
  */
 
 /* ---- The Wi-Fi: the node of the driver (the interface wlan0: /dev/wlan0, where the `wifi` tool looks for it) ---- */
@@ -34,6 +36,23 @@ static int wifi_set_enabled(bool enabled)
         return -ENODEV;
     int value = enabled ? 1 : 0;
     int ret = Dmod_Ioctl(node, DMDRVI_IOCTL_WIFI_SET_ENABLED, &value);
+    Dmod_FileClose(node);
+    return ret;
+}
+
+/* ---- The battery: the node of a gauge (the battery interface of dmdrvi). Its name is the section of the board's ini: /dev/battery ---- */
+
+#define BATTERY_NODE    "/dev/battery"          /* PHONEUI_BATTERY names another one */
+
+/* The battery now; a negative errno when there is no such node (the board has no gauge) or it does not answer */
+static int battery_status(dmdrvi_battery_status_t* status)
+{
+    const char* path = Dmod_GetEnv("PHONEUI_BATTERY");
+    void* node = Dmod_FileOpen((path != NULL && path[0] != '\0') ? path : BATTERY_NODE, "r");
+    if (node == NULL)
+        return -ENODEV;
+    memset(status, 0, sizeof(*status));
+    int ret = Dmod_Ioctl(node, DMDRVI_IOCTL_BATTERY_GET_STATUS, status);
     Dmod_FileClose(node);
     return ret;
 }
@@ -97,7 +116,14 @@ void phoneui_backend_status(phoneui_backend_t backend, phoneui_status_t* status)
     Dmod_SnPrintf(status->clock, sizeof(status->clock), "%02u:%02u", (unsigned)((minutes / 60U) % 24U), (unsigned)(minutes % 60U));
     copy(status->date, sizeof(status->date), "Saturday, 7 November");
     copy(status->line, sizeof(status->line), "3 mesh nodes  ·  GPS fix");
-    status->battery = 82;
+    dmdrvi_battery_status_t battery;
+    if (battery_status(&battery) == 0 && (battery.valid & DMDRVI_BATTERY_VALID_PERCENT) != 0U)
+    {
+        status->battery = battery.percent;
+        status->charging = (battery.valid & DMDRVI_BATTERY_VALID_STATE) != 0U && battery.state == DMDRVI_BATTERY_STATE_CHARGING;
+    }
+    else
+        status->battery = 82;                           /* (no gauge: made up, like the rest of the stub) */
     status->signal = 4;
     dmdrvi_wifi_status_t wifi;
     status->wifi = (wifi_status(&wifi) == 0 && wifi.state == DMDRVI_WIFI_STATE_CONNECTED) ? 1 : 0;
@@ -190,7 +216,11 @@ void phoneui_backend_quick(phoneui_backend_t backend, phoneui_quick_t* quick)
     dmdrvi_wifi_status_t wifi;
     quick->on[WIFI_TILE] = (wifi_status(&wifi) == 0 && wifi.state != DMDRVI_WIFI_STATE_OFF) ? 1 : 0;
     quick->level = backend->level;
-    copy(quick->battery, sizeof(quick->battery), "Battery 82%  ·  about 2 days left");
+    dmdrvi_battery_status_t battery;
+    if (battery_status(&battery) == 0)
+        phoneui_battery_line(&battery, quick->battery, sizeof(quick->battery));
+    else
+        copy(quick->battery, sizeof(quick->battery), "Battery 82%  ·  about 2 days left");
 }
 
 void phoneui_backend_quick_toggle(phoneui_backend_t backend, int tile, char* message, size_t size)

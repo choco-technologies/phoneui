@@ -7,7 +7,7 @@ or the view:
 
 | Part | Stub today | Plugged in by |
 |------|------------|---------------|
-| `phoneui_backend_status` | made-up status, a clock from the uptime | the RTC (dmutc), the battery gauge (BQ27220), the modem, the GPS |
+| `phoneui_backend_status` | made-up status, a clock from the uptime; **the battery is real** when the board has a gauge (below) | the RTC (dmutc), the modem, the GPS |
 | `..._notifications`, `..._inbox`, `..._thread` | made-up conversations | the message store: SMS (modem), the mesh (LoRa), messengers |
 | `..._quick*` | the tiles keep what they were set to; **the Wi-Fi tile is real** (below) | the other radios, the backlight, the haptic motor, the settings |
 | `..._store*` | made-up applications, "installs" nothing | the registry and `dmf-get` |
@@ -41,6 +41,17 @@ dmdrvi: `DMDRVI_IOCTL_WIFI_GET_STATUS` for what is shown, `DMDRVI_IOCTL_WIFI_SET
   available"; the radio still starting: "try again").
 - Without the node (the host: dmvshot, the tests) the tile is off, the icon is hidden and a tap says "Wi-Fi: not available".
 - The state of the switch is not kept: the radio is on after a start.
+
+## The battery (real, where the board has a gauge)
+
+The percentage and the charging icon of the status bar, and the line under the quick settings tiles, are the node of a battery gauge, `/dev/battery`
+(the name of the section of the board's ini; `PHONEUI_BATTERY` names another node), asked with the standard command of dmdrvi
+`DMDRVI_IOCTL_BATTERY_GET_STATUS` (the T-Deck Pro: `dmbq27220`, the BQ27220).
+
+- The percentage is the charge the gauge reports; the charging icon is shown while the state is **charging** (not when it is full).
+- The line says what the battery does, and leaves out what the gauge cannot tell (`src/battery_line.c`): `Battery 82%  ·  4 h 10 min left` while
+  discharging, `Battery 40%  ·  charging, full in 1 h 20 min`, `Battery 100%  ·  full`, `Battery 60%  ·  not charging`, `No battery`.
+- Without the node (the host: dmvshot, the tests; a board without a gauge) the made-up 82 % stays, as for the rest of the stub.
 
 Texts are cut to fit the view's fields (48 bytes). A table of the stub keeps its texts inside its arrays: a table of pointers to
 texts needs the relocations of the module, which a small embedded loader does not always do.

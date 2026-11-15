@@ -2,6 +2,8 @@
 #include "dmdrvi_ioctl.h"
 #include "phoneui_backend.h"
 #include "battery_line.h"
+#include "clock_line.h"
+#include "dmutc.h"
 #include <string.h>
 #include <errno.h>
 
@@ -108,13 +110,39 @@ void phoneui_backend_free(phoneui_backend_t backend)
     Dmod_Free(backend);
 }
 
+/* ---- The clock: the UTC of dmutc (the RTC, set from NTP) in the local time: PHONEUI_UTC_OFFSET (minutes, 60 = CET) and PHONEUI_DST (eu, off) ---- */
+
+static int env_int(const char* name, int fallback)
+{
+    const char* text = Dmod_GetEnv(name);
+    if (text == NULL || text[0] == '\0')
+        return fallback;
+    bool negative = text[0] == '-';
+    int value = 0;
+    for (const char* c = text + (negative ? 1 : 0); *c >= '0' && *c <= '9'; c++)
+        value = value * 10 + (*c - '0');
+    return negative ? -value : value;
+}
+
+static void clock_status(phoneui_status_t* status)
+{
+    dmutc_time_t now;
+    if (dmutc_get(&now) != 0)
+    {
+        /* No RTC or its time is not set (yet: the network is not up) */
+        copy(status->clock, sizeof(status->clock), "--:--");
+        copy(status->date, sizeof(status->date), "Time not set");
+        return;
+    }
+    const char* dst = Dmod_GetEnv("PHONEUI_DST");
+    bool eu = dst == NULL || dst[0] == '\0' || dst[0] == 'e' || dst[0] == 'E';
+    phoneui_clock_text(now.seconds, env_int("PHONEUI_UTC_OFFSET", 60), eu, status->clock, sizeof(status->clock), status->date, sizeof(status->date));
+}
+
 void phoneui_backend_status(phoneui_backend_t backend, phoneui_status_t* status)
 {
-    /* The clock runs from 09:41 at the start: minutes of the uptime */
-    uint32_t minutes = (uint32_t)(Dmod_GetUptime() / 60000U) + 9U * 60U + 41U;
     memset(status, 0, sizeof(*status));
-    Dmod_SnPrintf(status->clock, sizeof(status->clock), "%02u:%02u", (unsigned)((minutes / 60U) % 24U), (unsigned)(minutes % 60U));
-    copy(status->date, sizeof(status->date), "Saturday, 7 November");
+    clock_status(status);
     copy(status->line, sizeof(status->line), "3 mesh nodes  ·  GPS fix");
     dmdrvi_battery_status_t battery;
     if (battery_status(&battery) == 0 && (battery.valid & DMDRVI_BATTERY_VALID_PERCENT) != 0U)

@@ -55,3 +55,9 @@ The percentage and the charging icon of the status bar, and the line under the q
 
 Texts are cut to fit the view's fields (48 bytes). A table of the stub keeps its texts inside its arrays: a table of pointers to
 texts needs the relocations of the module, which a small embedded loader does not always do.
+
+## The clock
+
+The clock and the date of the status bar come from `dmutc_get()` (UTC: the RTC of the board, which dmutc sets from NTP when the network is
+up) in the local time: `PHONEUI_UTC_OFFSET` (minutes from UTC, default 60 = CET) and `PHONEUI_DST` (`eu`, the default: the summer time of the
+European Union; `off`). Until the time is set (no RTC, no network yet) the clock says `--:--` and the date "Time not set".

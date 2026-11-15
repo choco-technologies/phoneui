@@ -2,6 +2,7 @@
 #include "dmod_test.h"
 #include "phoneui_backend.h"
 #include "battery_line.h"
+#include "clock_line.h"
 #include <string.h>
 
 /* The stub backend: the data has the shape the view needs (texts fit, filters filter, state is kept) */
@@ -245,4 +246,35 @@ DMOD_TEST_STEP(battery_without_a_node_is_the_stub)
     phoneui_backend_quick(backend, &q);
     DMOD_TEST_EXPECT_TRUE(strncmp(q.battery, "Battery 82%", 11) == 0);
     phoneui_backend_free(backend);
+}
+
+/* The clock and the date from UTC: the offset, the summer time of the EU */
+DMOD_TEST_STEP(clock_text_from_utc)
+{
+    char clock[16], date[40];
+    /* 2026-11-15T13:05:00Z, a Sunday: CET is +1 h */
+    phoneui_clock_text(1794747900, 60, true, clock, sizeof(clock), date, sizeof(date));
+    DMOD_TEST_EXPECT_TRUE(strcmp(clock, "14:05") == 0);
+    DMOD_TEST_EXPECT_TRUE(strcmp(date, "Sunday, 15 November") == 0);
+    /* UTC, no offset */
+    phoneui_clock_text(1794747900, 0, false, clock, sizeof(clock), date, sizeof(date));
+    DMOD_TEST_EXPECT_TRUE(strcmp(clock, "13:05") == 0);
+    /* 2026-07-01T12:00:00Z: the summer time makes it 14:00 in Poland; Wednesday */
+    phoneui_clock_text(1782907200, 60, true, clock, sizeof(clock), date, sizeof(date));
+    DMOD_TEST_EXPECT_TRUE(strcmp(clock, "14:00") == 0);
+    DMOD_TEST_EXPECT_TRUE(strcmp(date, "Wednesday, 1 July") == 0);
+    /* the day changes with the offset: 2026-12-31T23:30:00Z is 2027-01-01 00:30 in Poland (a Friday) */
+    phoneui_clock_text(1798759800, 60, true, clock, sizeof(clock), date, sizeof(date));
+    DMOD_TEST_EXPECT_TRUE(strcmp(clock, "00:30") == 0);
+    DMOD_TEST_EXPECT_TRUE(strcmp(date, "Friday, 1 January") == 0);
+    /* the switch: 2026-03-29T00:59:59Z is still winter (01:59), 01:00:00Z is summer (03:00) */
+    phoneui_clock_text(1774745999, 60, true, clock, sizeof(clock), date, sizeof(date));
+    DMOD_TEST_EXPECT_TRUE(strcmp(clock, "01:59") == 0);
+    phoneui_clock_text(1774746000, 60, true, clock, sizeof(clock), date, sizeof(date));
+    DMOD_TEST_EXPECT_TRUE(strcmp(clock, "03:00") == 0);
+    /* 2026-10-25T00:59:59Z is still summer (02:59), 01:00:00Z is winter (02:00) */
+    phoneui_clock_text(1792889999, 60, true, clock, sizeof(clock), date, sizeof(date));
+    DMOD_TEST_EXPECT_TRUE(strcmp(clock, "02:59") == 0);
+    phoneui_clock_text(1792890000, 60, true, clock, sizeof(clock), date, sizeof(date));
+    DMOD_TEST_EXPECT_TRUE(strcmp(clock, "02:00") == 0);
 }

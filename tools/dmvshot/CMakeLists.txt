@@ -11,11 +11,13 @@ dmod_add_executable(${DMOD_MODULE_NAME} ${DMOD_MODULE_VERSION}
     ../../src/ui.c
     ../../src/backend_stub.c
     ../../src/battery_line.c
+    ../../src/clock_line.c
 )
 target_include_directories(${DMOD_MODULE_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../src)
 
 dmod_link_modules(${DMOD_MODULE_NAME}
     dmdrvi@>=2.15
+    dmutc
     dmosi
     libdmview@>=0.17
 )

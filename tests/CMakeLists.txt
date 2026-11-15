@@ -8,11 +8,13 @@ dmod_add_test(${DMOD_MODULE_NAME} ${DMOD_MODULE_VERSION}
     phoneui_test.c
     ../src/backend_stub.c
     ../src/battery_line.c
+    ../src/clock_line.c
 )
 target_include_directories(${DMOD_MODULE_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../src)
 target_compile_definitions(${DMOD_MODULE_NAME} PRIVATE PHONEUI_TEST_ICONS="${CMAKE_CURRENT_SOURCE_DIR}/icons")
 dmod_link_modules(${DMOD_MODULE_NAME}
     dmdrvi@>=2.15
+    dmutc
 )
 
 # Register the test module with ctest - this replays the same two steps CI

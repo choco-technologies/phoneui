@@ -77,11 +77,13 @@ dmod_add_executable(${DMOD_MODULE_NAME} ${DMOD_MODULE_VERSION}
     src/ui.c
     src/backend_stub.c
     src/battery_line.c
+    src/clock_line.c
 )
 
 # libdmview: the display claimed, the channel of the claim (dmdrvi: its types). libsystemd: the stop request of the service. dmosi: the waits.
 dmod_link_modules(${DMOD_MODULE_NAME}
     dmdrvi@>=2.15
+    dmutc
     dmosi
     libdmview@>=0.20
     libsystemd

@@ -10,7 +10,8 @@
  * it what the user did; the view knows nothing of it (it has properties and events - docs/contract.md). The implementation of this
  * file is the stub (backend_stub.c): data made up, nothing really done. A real function replaces its part of the stub - the
  * telephony, the messages, the radio, the settings, the store - without touching the application or the view. Real so far: the Wi-Fi
- * (the tile of the quick settings and the icon of the status bar) and the list of the applications.
+ * (the tile of the quick settings and the icon of the status bar), the list of the applications, the clock, the battery and the
+ * notifications of the home screen.
  */
 
 #define PHONEUI_TEXT            48U     /**< Longest text of a field of the view (it has 64 bytes with the end) */
@@ -105,7 +106,12 @@ phoneui_backend_t phoneui_backend_new(void);
 void phoneui_backend_free(phoneui_backend_t backend);
 
 void phoneui_backend_status(phoneui_backend_t backend, phoneui_status_t* status);
+/** The rows of the home screen: the notifications of the system (dmnotify - notes.h), the newest first */
 void phoneui_backend_notifications(phoneui_backend_t backend, phoneui_row_t rows[PHONEUI_NOTIFICATIONS]);
+/** Another value after every change of the notifications: the home screen is shown again when it differs */
+uint32_t phoneui_backend_notifications_serial(phoneui_backend_t backend);
+/** The module a row of the home screen is from (a tap on the row opens its application); false: the row is empty */
+bool phoneui_backend_notification_source(phoneui_backend_t backend, int row, char* source, size_t size);
 /** The inbox filtered by tab (0 all, 1 SMS, 2 mesh, 3 chats) */
 void phoneui_backend_inbox(phoneui_backend_t backend, int tab, phoneui_row_t rows[PHONEUI_THREADS]);
 /** The conversation of a row of the inbox (index of the filtered list) */

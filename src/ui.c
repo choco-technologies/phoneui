@@ -46,6 +46,7 @@ struct ui
     int                 thread_tab;         /* the tab and the row of the open conversation */
     int                 thread_row;
     unsigned            toasts;
+    uint32_t            notes_serial;       /* the notifications the home screen shows (phoneui_backend_notifications_serial()) */
     char                typed[TYPED_MAX + 1];   /* What the keyboard wrote (UTF-8) */
     bool                typing;                 /* The search bar is where the keys go: it shows a cursor */
     phoneui_app_t       apps[PHONEUI_APPS];     /* The applications of the list, as the view shows them */
@@ -158,8 +159,15 @@ static void show_rows(ui_t ui, const char* prefix, const phoneui_row_t* rows, un
 static void show_home(ui_t ui)
 {
     phoneui_row_t rows[PHONEUI_NOTIFICATIONS];
+    ui->notes_serial = phoneui_backend_notifications_serial(ui->backend);
     phoneui_backend_notifications(ui->backend, rows);
     show_rows(ui, "n", rows, PHONEUI_NOTIFICATIONS, false);
+}
+
+void ui_show_notifications(ui_t ui)
+{
+    if (phoneui_backend_notifications_serial(ui->backend) != ui->notes_serial)
+        show_home(ui);
 }
 
 static void show_inbox(ui_t ui)
@@ -486,7 +494,14 @@ void ui_handle(ui_t ui, const libdmview_event_t* ev)
         phoneui_backend_store_action(ui->backend, ui->store_tab, value, message, sizeof(message));
         show_store(ui);
     }
-    else if (strcmp(name, "notification") == 0 || strcmp(name, "apps.filter") == 0 || strcmp(name, "mods") == 0)
+    else if (strcmp(name, "notification") == 0)
+    {
+        /* a tap on a notification opens the application it is from (the source is the name of its module), when there is one */
+        char source[PHONEUI_TEXT];
+        if (phoneui_backend_notification_source(ui->backend, value, source, sizeof(source)))
+            (void)ui_launch(ui, source);
+    }
+    else if (strcmp(name, "apps.filter") == 0 || strcmp(name, "mods") == 0)
         ;                                                       /* nothing to do yet */
     else if (strcmp(name, "search") == 0)
     {

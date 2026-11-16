@@ -8,11 +8,29 @@ or the view:
 | Part | Stub today | Plugged in by |
 |------|------------|---------------|
 | `phoneui_backend_status` | made-up status, a clock from the uptime; **the battery is real** when the board has a gauge (below) | the RTC (dmutc), the modem, the GPS |
-| `..._notifications`, `..._inbox`, `..._thread` | made-up conversations | the message store: SMS (modem), the mesh (LoRa), messengers |
+| `..._notifications` | **real** (below) | |
+| `..._inbox`, `..._thread` | made-up conversations | the message store: SMS (modem), the mesh (LoRa), messengers |
 | `..._quick*` | the tiles keep what they were set to; **the Wi-Fi tile is real** (below) | the other radios, the backlight, the haptic motor, the settings |
 | `..._store*` | made-up applications, "installs" nothing | the registry and `dmf-get` |
 | `..._apps` | **real** (below) | |
 | `..._request` | "not available yet" | what the dock and the buttons ask for: calls, messages, search, send |
+
+## The notifications (real)
+
+The rows of the home screen are the notifications of the system: phoneui subscribes to the node of **dmnotify** (`/dev/notify`;
+`$PHONEUI_NOTIFY` says another) with its own name and implements the DIF of dmnotify (`src/notify_sink.c`: `_on_notify`, `_on_cancel`). What the
+modules notify about - libmeshcore: a text heard on a channel - lands in a list (`src/notes.c`, at most 8, the newest first), and the home screen
+shows its first three rows again whenever the list changes. A board without the node has no rows; the node may also come after the display
+(it is looked for until it is there).
+
+- The row: the **brief** is the title, the **message** the text, the time is when the phone first showed it. The icon is by the **source**:
+  `meshcore` the mesh, `sms`, `phone` a call, anything else a chat.
+- A tap on a row starts the application named as the source of the notification (`meshcore` opens the MeshCore application), when there is one.
+  The notification itself is taken back by its source (MeshCore: when the chat is on the screen).
+- The handlers run in the thread of the module that notifies: they only copy the texts (no formatting, no time - `notes.c`).
+- There is no lock screen yet, so the privacy of a notification changes nothing so far.
+
+`dmvshot` (the preview on a PC) has no node: it puts three made-up notifications in the list.
 
 ## The applications (real)
 

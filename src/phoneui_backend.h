@@ -110,8 +110,8 @@ void phoneui_backend_status(phoneui_backend_t backend, phoneui_status_t* status)
 void phoneui_backend_notifications(phoneui_backend_t backend, phoneui_row_t rows[PHONEUI_NOTIFICATIONS]);
 /** Another value after every change of the notifications: the home screen is shown again when it differs */
 uint32_t phoneui_backend_notifications_serial(phoneui_backend_t backend);
-/** The module a row of the home screen is from (a tap on the row opens its application); false: the row is empty */
-bool phoneui_backend_notification_source(phoneui_backend_t backend, int row, char* source, size_t size);
+/** The module a row of the home screen is from (a tap on the row opens its application, told the channel: `--open <channel>`); false: the row is empty */
+bool phoneui_backend_notification_source(phoneui_backend_t backend, int row, char* source, size_t size, uint32_t* channel);
 /** The inbox filtered by tab (0 all, 1 SMS, 2 mesh, 3 chats) */
 void phoneui_backend_inbox(phoneui_backend_t backend, int tab, phoneui_row_t rows[PHONEUI_THREADS]);
 /** The conversation of a row of the inbox (index of the filtered list) */

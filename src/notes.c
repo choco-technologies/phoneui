@@ -191,7 +191,7 @@ void phoneui_notes_rows(phoneui_row_t rows[PHONEUI_NOTIFICATIONS], const char* c
     dmosi_mutex_unlock(g_lock);
 }
 
-bool phoneui_notes_source(unsigned row, char* source, size_t size)
+bool phoneui_notes_source(unsigned row, char* source, size_t size, uint32_t* channel)
 {
     bool found = false;
     if (g_lock == NULL || size == 0u)
@@ -209,6 +209,8 @@ bool phoneui_notes_source(unsigned row, char* source, size_t size)
     if (note != NULL)
     {
         copy_text(source, size, note->source);
+        if (channel != NULL)
+            *channel = note->channel;
         found = true;
     }
     dmosi_mutex_unlock(g_lock);

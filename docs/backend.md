@@ -25,7 +25,9 @@ shows its first three rows again whenever the list changes. A board without the 
 
 - The row: the **brief** is the title, the **message** the text, the time is when the phone first showed it. The icon is by the **source**:
   `meshcore` the mesh, `sms`, `phone` a call, anything else a chat.
-- A tap on a row starts the application named as the source of the notification (`meshcore` opens the MeshCore application), when there is one.
+- A tap on a row starts the application named as the source of the notification (`meshcore` opens the MeshCore application), when there is one,
+  and tells it which notification: `<app> --display <rent> --open <channel>` - the channel the source gave the notification. MeshCore opens the chat of
+  that channel; an application that does not know `--open` should ignore it.
   The notification itself is taken back by its source (MeshCore: when the chat is on the screen).
 - The handlers run in the thread of the module that notifies: they only copy the texts (no formatting, no time - `notes.c`).
 - There is no lock screen yet, so the privacy of a notification changes nothing so far.

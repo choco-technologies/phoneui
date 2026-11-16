@@ -37,8 +37,8 @@ size_t phoneui_notes_count(void);
  * were not shown yet are stamped with - they came since the last call.
  */
 void phoneui_notes_rows(phoneui_row_t rows[PHONEUI_NOTIFICATIONS], const char* clock);
-/** The source of a row (the module that notified - the application a tap on the row opens); false: the row is empty */
-bool phoneui_notes_source(unsigned row, char* source, size_t size);
+/** The source of a row (the module that notified - the application a tap on the row opens) and its channel (what the application is told to open); false: the row is empty */
+bool phoneui_notes_source(unsigned row, char* source, size_t size, uint32_t* channel);
 
 /** What a source is shown as (the icon of the row): phoneui_kind_t */
 int32_t phoneui_notes_kind(const char* source);

@@ -54,7 +54,7 @@ DMOD_TEST_STEP(home_screen_has_no_notifications_of_its_own)
     phoneui_backend_notifications(backend, rows);
     DMOD_TEST_EXPECT_EQ(shown(rows), 0u);
     char source[PHONEUI_NOTE_SOURCE];
-    DMOD_TEST_EXPECT_FALSE(phoneui_backend_notification_source(backend, 0, source, sizeof(source)));
+    DMOD_TEST_EXPECT_FALSE(phoneui_backend_notification_source(backend, 0, source, sizeof(source), NULL));
     phoneui_backend_free(backend);
 }
 
@@ -78,10 +78,12 @@ DMOD_TEST_STEP(notifications_are_shown_newest_first)
     DMOD_TEST_EXPECT_TRUE(strcmp(rows[1].text, "Marek: hello") == 0);
     DMOD_TEST_EXPECT_EQ((int)strlen(rows[1].time), 5);              /* stamped when first shown */
     char source[PHONEUI_NOTE_SOURCE];
-    DMOD_TEST_EXPECT_TRUE(phoneui_backend_notification_source(backend, 1, source, sizeof(source)));
+    uint32_t channel = 99;
+    DMOD_TEST_EXPECT_TRUE(phoneui_backend_notification_source(backend, 1, source, sizeof(source), &channel));
     DMOD_TEST_EXPECT_TRUE(strcmp(source, "meshcore") == 0);
-    DMOD_TEST_EXPECT_FALSE(phoneui_backend_notification_source(backend, 2, source, sizeof(source)));
-    DMOD_TEST_EXPECT_FALSE(phoneui_backend_notification_source(backend, -1, source, sizeof(source)));
+    DMOD_TEST_EXPECT_EQ(channel, 1u);
+    DMOD_TEST_EXPECT_FALSE(phoneui_backend_notification_source(backend, 2, source, sizeof(source), &channel));
+    DMOD_TEST_EXPECT_FALSE(phoneui_backend_notification_source(backend, -1, source, sizeof(source), &channel));
     phoneui_backend_free(backend);
 }
 

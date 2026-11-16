@@ -187,10 +187,10 @@ uint32_t phoneui_backend_notifications_serial(phoneui_backend_t backend)
     return phoneui_notes_serial();
 }
 
-bool phoneui_backend_notification_source(phoneui_backend_t backend, int row, char* source, size_t size)
+bool phoneui_backend_notification_source(phoneui_backend_t backend, int row, char* source, size_t size, uint32_t* channel)
 {
     (void)backend;
-    return row >= 0 && phoneui_notes_source((unsigned)row, source, size);
+    return row >= 0 && phoneui_notes_source((unsigned)row, source, size, channel);
 }
 
 static bool in_tab(const contact_t* c, int tab)

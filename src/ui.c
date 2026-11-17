@@ -46,6 +46,7 @@ struct ui
     int                 thread_tab;         /* the tab and the row of the open conversation */
     int                 thread_row;
     unsigned            toasts;
+    uint32_t            notes_serial;       /* the notifications the home screen shows (phoneui_backend_notifications_serial()) */
     char                typed[TYPED_MAX + 1];   /* What the keyboard wrote (UTF-8) */
     bool                typing;                 /* The search bar is where the keys go: it shows a cursor */
     phoneui_app_t       apps[PHONEUI_APPS];     /* The applications of the list, as the view shows them */
@@ -56,7 +57,8 @@ struct ui
     /* The arguments of the application: Dmod_Spawn() keeps the pointers for as long as the process runs, so they are not on a stack */
     char                app_name[PHONEUI_TEXT];
     char                rent_name[48];
-    char*               app_argv[3];
+    char                app_open[12];           /* "--open <channel>" of an application started from a notification */
+    char*               app_argv[5];
 };
 
 static cache_entry_t* cache_find(cache_t* cache, const char* name)
@@ -158,8 +160,15 @@ static void show_rows(ui_t ui, const char* prefix, const phoneui_row_t* rows, un
 static void show_home(ui_t ui)
 {
     phoneui_row_t rows[PHONEUI_NOTIFICATIONS];
+    ui->notes_serial = phoneui_backend_notifications_serial(ui->backend);
     phoneui_backend_notifications(ui->backend, rows);
     show_rows(ui, "n", rows, PHONEUI_NOTIFICATIONS, false);
+}
+
+void ui_show_notifications(ui_t ui)
+{
+    if (phoneui_backend_notifications_serial(ui->backend) != ui->notes_serial)
+        show_home(ui);
 }
 
 static void show_inbox(ui_t ui)
@@ -353,7 +362,7 @@ static void app_close(ui_t ui)
  * (`--display NAME`) and claims it; it is shown while the page is, has the keys (except Escape, which is the phone's) and ends when
  * the rent is taken back - on any other page, or when the user leaves.
  */
-static void app_launch(ui_t ui, int index, char* message, size_t size)
+static void app_launch(ui_t ui, int index, bool with_open, uint32_t open, char* message, size_t size)
 {
     if (index < 0 || (unsigned)index >= ui->app_count)
     {
@@ -380,7 +389,14 @@ static void app_launch(ui_t ui, int index, char* message, size_t size)
     ui->app_argv[0] = ui->app_name;
     ui->app_argv[1] = "--display";
     ui->app_argv[2] = ui->rent_name;
-    int pid = Dmod_SpawnModule(ui->app_name, 3, ui->app_argv, NULL);
+    int argc = 3;
+    if (with_open)
+    {
+        Dmod_SnPrintf(ui->app_open, sizeof(ui->app_open), "%u", (unsigned)open);
+        ui->app_argv[argc++] = "--open";
+        ui->app_argv[argc++] = ui->app_open;
+    }
+    int pid = Dmod_SpawnModule(ui->app_name, argc, ui->app_argv, NULL);
     if (pid < 0)
     {
         (void)libdmview_rent_release(rent);
@@ -396,7 +412,7 @@ static void app_launch(ui_t ui, int index, char* message, size_t size)
     DMOD_LOG_INFO("phoneui: %s (pid %d) runs in the rent %s\n", app->name, pid, name);
 }
 
-bool ui_launch(ui_t ui, const char* name)
+static bool launch_by_name(ui_t ui, const char* name, bool with_open, uint32_t open)
 {
     show_apps(ui);
     for (unsigned i = 0; i < ui->app_count; i++)
@@ -404,7 +420,7 @@ bool ui_launch(ui_t ui, const char* name)
         if (strcmp(ui->apps[i].name, name) != 0)
             continue;
         char message[VALUE_MAX_LEN] = "";
-        app_launch(ui, (int)i, message, sizeof(message));
+        app_launch(ui, (int)i, with_open, open, message, sizeof(message));
         if (message[0] != '\0')
             toast(ui, message);
         else
@@ -412,6 +428,11 @@ bool ui_launch(ui_t ui, const char* name)
         return true;
     }
     return false;
+}
+
+bool ui_launch(ui_t ui, const char* name)
+{
+    return launch_by_name(ui, name, false, 0);
 }
 
 void ui_handle(ui_t ui, const libdmview_event_t* ev)
@@ -436,7 +457,7 @@ void ui_handle(ui_t ui, const libdmview_event_t* ev)
         ui_show_all(ui);                                           /* a page opens: what it shows is up to date */
     }
     else if (strcmp(name, "launch") == 0)
-        app_launch(ui, value, message, sizeof(message));
+        app_launch(ui, value, false, 0, message, sizeof(message));
     else if (strcmp(name, "rent.closed") == 0)
     {
         /* Its application ended by itself: the rent is of no use, the user is back at the applications */
@@ -486,7 +507,15 @@ void ui_handle(ui_t ui, const libdmview_event_t* ev)
         phoneui_backend_store_action(ui->backend, ui->store_tab, value, message, sizeof(message));
         show_store(ui);
     }
-    else if (strcmp(name, "notification") == 0 || strcmp(name, "apps.filter") == 0 || strcmp(name, "mods") == 0)
+    else if (strcmp(name, "notification") == 0)
+    {
+        /* a tap on a notification opens the application it is from (the source is the name of its module), when there is one */
+        char source[PHONEUI_TEXT];
+        uint32_t channel = 0;
+        if (phoneui_backend_notification_source(ui->backend, value, source, sizeof(source), &channel))
+            (void)launch_by_name(ui, source, true, channel);
+    }
+    else if (strcmp(name, "apps.filter") == 0 || strcmp(name, "mods") == 0)
         ;                                                       /* nothing to do yet */
     else if (strcmp(name, "search") == 0)
     {

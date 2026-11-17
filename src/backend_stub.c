@@ -1,6 +1,7 @@
 #include "dmod.h"
 #include "dmdrvi_ioctl.h"
 #include "phoneui_backend.h"
+#include "notes.h"
 #include "battery_line.h"
 #include "clock_line.h"
 #include "dmutc.h"
@@ -174,14 +175,22 @@ static void contact_row(const contact_t* c, phoneui_row_t* row)
 void phoneui_backend_notifications(phoneui_backend_t backend, phoneui_row_t rows[PHONEUI_NOTIFICATIONS])
 {
     (void)backend;
-    memset(rows, 0, PHONEUI_NOTIFICATIONS * sizeof(rows[0]));
-    for (unsigned i = 0; i < PHONEUI_NOTIFICATIONS; i++)
-        contact_row(&CONTACTS[i], &rows[i]);
-    copy(rows[0].title, sizeof(rows[0].title), "Anna");
-    copy(rows[0].text, sizeof(rows[0].text), "Będę o 18, zostaw klucze…");
-    copy(rows[1].text, sizeof(rows[1].text), "Marek: kto na szlaku?");
-    copy(rows[2].title, sizeof(rows[2].title), "Missed call");
-    copy(rows[2].text, sizeof(rows[2].text), "Tomek");
+    phoneui_status_t now;                               /* the notifications that came since the last look get this time */
+    memset(&now, 0, sizeof(now));
+    clock_status(&now);
+    phoneui_notes_rows(rows, now.clock);
+}
+
+uint32_t phoneui_backend_notifications_serial(phoneui_backend_t backend)
+{
+    (void)backend;
+    return phoneui_notes_serial();
+}
+
+bool phoneui_backend_notification_source(phoneui_backend_t backend, int row, char* source, size_t size, uint32_t* channel)
+{
+    (void)backend;
+    return row >= 0 && phoneui_notes_source((unsigned)row, source, size, channel);
 }
 
 static bool in_tab(const contact_t* c, int tab)

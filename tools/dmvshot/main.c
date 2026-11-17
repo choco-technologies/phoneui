@@ -3,6 +3,7 @@
 #include "libdmview.h"
 #include "dmdrvi_ioctl.h"
 #include "../../src/ui.h"
+#include "../../src/notes.h"
 #include <string.h>
 
 /*
@@ -190,6 +191,13 @@ int main(int argc, char* argv[])
     }
     (void)libdmview_attach(s.view, display);
     phoneui_backend_t backend = phoneui_backend_new();
+    /* On the phone the notifications come from the node of dmnotify; here a few are made up, for the home screen to show its rows */
+    if (phoneui_notes_init())
+    {
+        phoneui_notes_put("phone", 1, "Missed call", "Tomek");
+        phoneui_notes_put("meshcore", 1, "#general", "Marek: kto na szlaku?");
+        phoneui_notes_put("sms", 1, "Anna", "B\xC4\x99" "d\xC4\x99" " o 18, zostaw klucze\xE2\x80\xA6");
+    }
     s.ui = ui_new(s.claim, backend);
     ui_show_all(s.ui);
     settle(&s, 200);

@@ -21,7 +21,7 @@ Texts are at most 48 bytes (a property holds 64).
 | `signal` | 0..4 | the bars of the cellular network |
 | `wifi`, `bt`, `gps`, `lora` | 0/1 | the indicator is shown (`wifi`: connected to a network) |
 | `toast` | text | a line at the bottom for a moment. The text must change for the view to see it (the application alternates a trailing space) |
-| `n<0..2>.kind` | 0 none, 1 sms, 2 mesh, 3 call, 4 chat | a row of the home screen's notifications and its icon (set last: the row appears with its texts) |
+| `n<0..2>.kind` | 0 none, 1 sms, 2 mesh, 3 call, 4 chat | a row of the home screen's notifications (the newest three of dmnotify) and its icon (set last: the row appears with its texts) |
 | `n<i>.title`, `.text`, `.time` | text | its texts |
 | `n<i>.badge` | int | unread messages, 0: no badge |
 | `m<0..4>.kind` | as above | a row of the inbox and the tag (SMS, MESH, CALL, CHAT); 0: no row |
@@ -48,7 +48,7 @@ Texts are at most 48 bytes (a property holds 64).
 | `page` | 0 home, 1 apps, 2 inbox, 3 chat, 4 quick settings, 5 store, 6 an application | a page opened (the application refreshes what it shows; leaving page 6 ends the application) |
 | `launch` | the cell of the grid (0..23, the order of `a<i>`) | an application's icon was touched: the application starts it in a rent of the screen (page 6, which the view opens itself) |
 | `dock` | the tile 0..3 | a tile of the dock that is not a page of the view (phone, mesh, maps: there is nothing behind them yet) |
-| `notification` | the row | a notification of the home screen |
+| `notification` | the row | a notification of the home screen was touched: the application of its source is started |
 | `char` | Unicode | a key that gives a character went down (from libdmview_key): the application writes it in the search bar |
 | `key` | USB HID usage | a key that gives none went down: Backspace erases, Escape clears, Enter takes the text (a toast) |
 | `mods` | bits | the modifiers changed (shift 1, ctrl 2, alt 4, sym 8, caps 16) - not used yet |

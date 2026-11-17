@@ -22,6 +22,8 @@ uint32_t ui_failures(ui_t ui);
 void ui_show_all(ui_t ui);
 /** The status bar and the home screen (the clock moves) */
 void ui_show_status(ui_t ui);
+/** The notifications of the home screen, when they changed since they were shown */
+void ui_show_notifications(ui_t ui);
 /** What the view asked for */
 void ui_handle(ui_t ui, const libdmview_event_t* event);
 

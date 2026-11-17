@@ -4,6 +4,7 @@
 #include "libsystemd.h"
 #include "phoneui_backend.h"
 #include "ui.h"
+#include "notify_sink.h"
 #include <string.h>
 #include <errno.h>
 
@@ -14,6 +15,7 @@
  * and run in libdmview. phoneui claims the display for the view (libdmview_claim()) and talks to it through the channel of the claim:
  * it sets the view's properties - the clock, the battery, the rows of the lists ... (docs/contract.md) - and takes the events - what
  * was touched. What the phone does comes from a backend (phoneui_backend.h): until the functions are there, the stub.
+ * The notifications of the home screen are the ones of the system: phoneui subscribes to the node of dmnotify (notify_sink.c).
  *
  * It is started as a service (configs/phoneui.ini): the display is waited for.
  *
@@ -104,7 +106,10 @@ int main(int argc, char* argv[])
         if (got == 0)
             ui_handle(ui, &ev);
         ui_show_status(ui);                                     /* the clock moves */
+        (void)phoneui_notify_open();                            /* (the node of the notifications can come after the display) */
+        ui_show_notifications(ui);
     }
+    phoneui_notify_close();
     ui_free(ui);
     phoneui_backend_free(backend);
     (void)libdmview_release(claim);

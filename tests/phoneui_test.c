@@ -3,6 +3,7 @@
 #include "phoneui_backend.h"
 #include "battery_line.h"
 #include "clock_line.h"
+#include "notes.h"
 #include <string.h>
 
 /* The stub backend: the data has the shape the view needs (texts fit, filters filter, state is kept) */
@@ -34,17 +35,97 @@ DMOD_TEST_STEP(status_is_complete)
     phoneui_backend_free(backend);
 }
 
-DMOD_TEST_STEP(notifications_fill_the_home_screen)
+/* ---- The notifications: the list the subscription to dmnotify fills (notes.c) ---- */
+
+static unsigned shown(const phoneui_row_t* rows)
+{
+    unsigned n = 0;
+    for (unsigned i = 0; i < PHONEUI_NOTIFICATIONS; i++)
+        n += rows[i].kind != phoneui_kind_none;
+    return n;
+}
+
+DMOD_TEST_STEP(home_screen_has_no_notifications_of_its_own)
 {
     phoneui_backend_t backend = fresh();
     phoneui_row_t rows[PHONEUI_NOTIFICATIONS];
+    DMOD_TEST_EXPECT_TRUE(phoneui_notes_init());
+    phoneui_notes_clear();
     phoneui_backend_notifications(backend, rows);
-    for (unsigned i = 0; i < PHONEUI_NOTIFICATIONS; i++)
-    {
-        DMOD_TEST_EXPECT_TRUE(rows[i].kind != phoneui_kind_none);
-        DMOD_TEST_EXPECT_TRUE(rows[i].title[0] != '\0');
-    }
+    DMOD_TEST_EXPECT_EQ(shown(rows), 0u);
+    char source[PHONEUI_NOTE_SOURCE];
+    DMOD_TEST_EXPECT_FALSE(phoneui_backend_notification_source(backend, 0, source, sizeof(source), NULL));
     phoneui_backend_free(backend);
+}
+
+DMOD_TEST_STEP(notifications_are_shown_newest_first)
+{
+    phoneui_backend_t backend = fresh();
+    phoneui_row_t rows[PHONEUI_NOTIFICATIONS];
+    DMOD_TEST_EXPECT_TRUE(phoneui_notes_init());
+    phoneui_notes_clear();
+    uint32_t serial = phoneui_backend_notifications_serial(backend);
+    phoneui_notes_put("meshcore", 1, "#test", "Marek: hello");
+    DMOD_TEST_EXPECT_TRUE(phoneui_backend_notifications_serial(backend) != serial);
+    phoneui_notes_put("sms", 1, "Anna", NULL);
+    phoneui_backend_notifications(backend, rows);
+    DMOD_TEST_EXPECT_EQ(shown(rows), 2u);
+    DMOD_TEST_EXPECT_EQ(rows[0].kind, phoneui_kind_sms);
+    DMOD_TEST_EXPECT_TRUE(strcmp(rows[0].title, "Anna") == 0);
+    DMOD_TEST_EXPECT_TRUE(rows[0].text[0] == '\0');
+    DMOD_TEST_EXPECT_EQ(rows[1].kind, phoneui_kind_mesh);
+    DMOD_TEST_EXPECT_TRUE(strcmp(rows[1].title, "#test") == 0);
+    DMOD_TEST_EXPECT_TRUE(strcmp(rows[1].text, "Marek: hello") == 0);
+    DMOD_TEST_EXPECT_EQ((int)strlen(rows[1].time), 5);              /* stamped when first shown */
+    char source[PHONEUI_NOTE_SOURCE];
+    uint32_t channel = 99;
+    DMOD_TEST_EXPECT_TRUE(phoneui_backend_notification_source(backend, 1, source, sizeof(source), &channel));
+    DMOD_TEST_EXPECT_TRUE(strcmp(source, "meshcore") == 0);
+    DMOD_TEST_EXPECT_EQ(channel, 1u);
+    DMOD_TEST_EXPECT_FALSE(phoneui_backend_notification_source(backend, 2, source, sizeof(source), &channel));
+    DMOD_TEST_EXPECT_FALSE(phoneui_backend_notification_source(backend, -1, source, sizeof(source), &channel));
+    phoneui_backend_free(backend);
+}
+
+DMOD_TEST_STEP(a_notification_of_the_same_channel_replaces_and_moves_up)
+{
+    phoneui_row_t rows[PHONEUI_NOTIFICATIONS];
+    DMOD_TEST_EXPECT_TRUE(phoneui_notes_init());
+    phoneui_notes_clear();
+    phoneui_notes_put("meshcore", 1, "#test", "1 message");
+    phoneui_notes_put("meshcore", 2, "#other", "x");
+    phoneui_notes_put("meshcore", 1, "#test", "2 messages");
+    DMOD_TEST_EXPECT_EQ((unsigned)phoneui_notes_count(), 2u);
+    phoneui_notes_rows(rows, "10:00");
+    DMOD_TEST_EXPECT_TRUE(strcmp(rows[0].text, "2 messages") == 0);
+    DMOD_TEST_EXPECT_TRUE(strcmp(rows[1].title, "#other") == 0);
+    phoneui_notes_remove("meshcore", 1);
+    phoneui_notes_remove("meshcore", 9);                            /* (not there: nothing happens) */
+    phoneui_notes_rows(rows, "10:01");
+    DMOD_TEST_EXPECT_EQ(shown(rows), 1u);
+    DMOD_TEST_EXPECT_TRUE(strcmp(rows[0].title, "#other") == 0);
+    DMOD_TEST_EXPECT_TRUE(strcmp(rows[0].time, "10:00") == 0);      /* the time of a notification is when it was first shown */
+}
+
+DMOD_TEST_STEP(the_oldest_notification_makes_room_and_long_texts_are_cut)
+{
+    phoneui_row_t rows[PHONEUI_NOTIFICATIONS];
+    DMOD_TEST_EXPECT_TRUE(phoneui_notes_init());
+    phoneui_notes_clear();
+    for (uint32_t i = 0; i < PHONEUI_NOTES + 2u; i++)
+        phoneui_notes_put("app", i, "brief", "text");
+    DMOD_TEST_EXPECT_EQ((unsigned)phoneui_notes_count(), PHONEUI_NOTES);
+    /* 30 x "ż" (2 bytes each) do not fit the 47 bytes of a field: 23 whole letters are kept */
+    char text[61];
+    for (unsigned i = 0; i < 30; i++)
+        memcpy(text + 2 * i, "\xC5\xBC", 2);
+    text[60] = '\0';
+    phoneui_notes_put("app", 100, text, text);
+    phoneui_notes_rows(rows, "10:00");
+    DMOD_TEST_EXPECT_EQ((int)strlen(rows[0].title), 46);
+    DMOD_TEST_EXPECT_EQ((int)strlen(rows[0].text), 46);
+    DMOD_TEST_EXPECT_EQ(rows[0].kind, phoneui_kind_chat);
+    phoneui_notes_clear();
 }
 
 static unsigned count_rows(const phoneui_row_t* rows)
